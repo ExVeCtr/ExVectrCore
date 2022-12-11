@@ -1,10 +1,11 @@
 #ifndef VECTRCORE_UTILITIES_SCHEDULER_H
 #define VECTRCORE_UTILITIES_SCHEDULER_H
 
-#include "string.h"
-
 #include "list.hpp"
-#include "system_time.hpp"
+#include "time_system.hpp"
+
+#include "string.h"
+#include "stdint.h"
 
 namespace VCTR
 {

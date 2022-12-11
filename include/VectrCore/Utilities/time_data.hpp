@@ -1,13 +1,14 @@
 #ifndef VECTRCORE_UTILITIES_DATETIME_H
 #define VECTRCORE_UTILITIES_DATETIME_H
 
-#include "stdint.h"
-
 #include "time_definitions.hpp"
+
+#include "stdint.h"
 
 namespace VCTR
 {
 
+    
     class TimeSpan
     {
     private:

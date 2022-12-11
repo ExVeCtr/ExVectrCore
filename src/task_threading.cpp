@@ -1,20 +1,17 @@
-#include "KraftKontrol/utils/Simple-Schedule/task_threading.h"
+#include "VectrCore/Utilities/scheduler.hpp"
 
 
-#include "Arduino.h"
-
-
-int64_t Task_Threading::systemResourceCalcTimestamp_;
-float Task_Threading::schedulerUsage_;
-float Task_Threading::sleepPercent_ = 0;
-void (*Task_Threading::sleepFunction_)(int64_t) = nullptr;
-int64_t Task_Threading::timeSpentSleeping_ = 0;
+int64_t VCTR::Task_Threading::systemResourceCalcTimestamp_;
+float VCTR::Task_Threading::schedulerUsage_;
+float VCTR::Task_Threading::sleepPercent_ = 0;
+void (*VCTR::Task_Threading::sleepFunction_)(int64_t) = nullptr;
+int64_t VCTR::Task_Threading::timeSpentSleeping_ = 0;
 
 
 
-void Task_Threading::schedulerInitTasks() {
+void VCTR::Task_Threading::schedulerInitTasks() {
 
-    for (uint32_t i = 0; i < taskList().getNumItems(); i++) {
+    for (uint32_t i = 0; i < taskList().size(); i++) {
         taskList()[i]->initWasCalled_ = true;
         taskList()[i]->init();
     }
@@ -22,9 +19,9 @@ void Task_Threading::schedulerInitTasks() {
 }
 
 
-void Task_Threading::schedulerTick() {
+void VCTR::Task_Threading::schedulerTick() {
 
-    if (taskList().getNumItems() == 0) return;
+    if (taskList().size() == 0) return;
 
     uint32_t lastPriority = UINT32_MAX;
     uint32_t currentPriority = UINT32_MAX;
@@ -34,7 +31,7 @@ void Task_Threading::schedulerTick() {
 
     Task_Threading* task;
 
-    for (uint32_t i = 0; i < taskList().getNumItems(); i++) {
+    for (uint32_t i = 0; i < taskList().size(); i++) {
         task = taskList()[i];
         if (!task->initWasCalled_) {
             task->initWasCalled_ = true;
@@ -48,7 +45,7 @@ void Task_Threading::schedulerTick() {
     while (!taskRan && taskFound) {
 
         //Check if any tasks with this priority need to be ran
-        for (uint32_t i = 0; i < taskList().getNumItems(); i++) {
+        for (uint32_t i = 0; i < taskList().size(); i++) {
 
             task = taskList()[i];
 
@@ -80,7 +77,7 @@ void Task_Threading::schedulerTick() {
 
             taskFound = false;
 
-            for (uint32_t i = 0; i < taskList().getNumItems(); i++) {
+            for (uint32_t i = 0; i < taskList().size(); i++) {
 
                 task = taskList()[i];
 
@@ -95,7 +92,7 @@ void Task_Threading::schedulerTick() {
 
             uint32_t taskPrio = 0;
 
-            for (uint32_t i = 0; i < taskList().getNumItems(); i++) {
+            for (uint32_t i = 0; i < taskList().size(); i++) {
 
                 task = taskList()[i];
 
@@ -119,7 +116,7 @@ void Task_Threading::schedulerTick() {
         //Calculate time usage for each task.
         int64_t totalTime = dTime;  
         int64_t timeLeft = totalTime;
-        for (uint32_t i = 0; i < taskList().getNumItems(); i++) {
+        for (uint32_t i = 0; i < taskList().size(); i++) {
 
             task = taskList()[i];
 
@@ -141,7 +138,7 @@ void Task_Threading::schedulerTick() {
 
 
     int64_t nextTaskRun = END_OF_TIME;
-    for (uint32_t i = 0; i < taskList().getNumItems(); i++) {
+    for (uint32_t i = 0; i < taskList().size(); i++) {
 
         task = taskList()[i];
 
@@ -174,7 +171,7 @@ void Task_Threading::schedulerTick() {
 
 
 
-List<Task_Threading*>& Task_Threading::taskList() {
+VCTR::List<VCTR::Task_Threading*>& VCTR::Task_Threading::taskList() {
 
     static List<Task_Threading*> taskList_g = List<Task_Threading*>();
 

@@ -17,22 +17,22 @@ namespace VCTR
     constexpr int64_t MONTHS = 30 * DAYS;
     constexpr int64_t YEARS = 365 * DAYS;
 
+    /// @brief The end of time for precise clock.
     constexpr int64_t END_OF_TIME = INT64_MAX;
 
     /**
-     * @brief Get the local time since system start.
+     * @brief Get the time since system start in nanoseconds. (Precise clock)
      *
-     * @return int64_t
+     * @return time in nanoseconds
      */
     extern int64_t NOW();
 
     /**
-     * @brief Get the system dependent time since system start.
-     * @note Use SystemTime object or NOW() rather than this.
-     * @note To be implemented by platform.
+     * @brief Get the time since system start in seconds. (Precise clock)
      *
+     * @return time in seconds
      */
-    extern int64_t internalTime();
+    extern double NOWSeconds();
 
 }
 

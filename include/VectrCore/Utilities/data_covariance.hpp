@@ -5,7 +5,7 @@ namespace VCTR
 {
 
     /**
-     * Simple container class for storing sensor values and their covariances for distribution via topics.
+     * Simple container class for storing values together with their covariances.
      */
     template <typename VALUETYPE, typename COVARIANCETYPE>
     class DataCovariance

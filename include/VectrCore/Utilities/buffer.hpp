@@ -1,11 +1,6 @@
 #ifndef VECTRCORE_UTILITIES_BUFFER_H
 #define VECTRCORE_UTILITIES_BUFFER_H
 
-/**
- * This class implements a queue and stack type buffer.
- * Implements many additional functions.
- */
-
 #include "stdint.h"
 #include "math.h"
 

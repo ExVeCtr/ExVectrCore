@@ -7,7 +7,7 @@ namespace VCTR
 {
 
     /**
-     * Designed to take data and save it directly with a timestamp.
+     * Designed to take data and mark it directly with a timestamp.
      * Timestamp defaults to 0 if not set!
      */
     template <typename T>

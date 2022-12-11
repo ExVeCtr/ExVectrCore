@@ -1,9 +1,9 @@
 #ifndef VECTRCORE_UTILITIES_TOPIC_H
 #define VECTRCORE_UTILITIES_TOPIC_H
 
-#include "stdint.h"
-
 #include "list.hpp"
+
+#include "stdint.h"
 
 namespace VCTR
 {
