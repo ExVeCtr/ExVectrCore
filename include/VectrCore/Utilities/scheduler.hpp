@@ -1,7 +1,7 @@
 #ifndef VECTRCORE_UTILITIES_SCHEDULER_H
 #define VECTRCORE_UTILITIES_SCHEDULER_H
 
-#include "list.hpp"
+#include "list_array.hpp"
 #include "time_system.hpp"
 
 #include "string.h"
@@ -45,7 +45,7 @@ namespace VCTR
 
         static float sleepPercent_;
 
-        static List<Task_Threading *> &taskList();
+        static ListArray<Task_Threading *> &taskList();
 
         // Function to run to enter sleep for given amount of time
         static void (*sleepFunction_)(int64_t);
@@ -326,7 +326,7 @@ namespace VCTR
         /**
          * @returns list containing pointers to all tasks.
          */
-        static const List<Task_Threading *> &getTaskList()
+        static const ListArray<Task_Threading *> &getTaskList()
         {
             return taskList();
         }

@@ -171,9 +171,9 @@ void VCTR::Task_Threading::schedulerTick() {
 
 
 
-VCTR::List<VCTR::Task_Threading*>& VCTR::Task_Threading::taskList() {
+VCTR::ListArray<VCTR::Task_Threading*>& VCTR::Task_Threading::taskList() {
 
-    static List<Task_Threading*> taskList_g = List<Task_Threading*>();
+    static ListArray<Task_Threading*> taskList_g = ListArray<Task_Threading*>();
 
     return taskList_g;
 
