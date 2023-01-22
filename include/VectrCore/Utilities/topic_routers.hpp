@@ -1,6 +1,8 @@
 #ifndef VECTRCORE_UTILITIES_TOPICROUTERS_H
 #define VECTRCORE_UTILITIES_TOPICROUTERS_H
 
+#include "list_array.hpp"
+
 #include "topic.hpp"
 #include "topic_subscribers.hpp"
 
@@ -18,7 +20,7 @@ namespace VCTR
     class TopicRouter : public Subscriber_Interface<TYPE>
     {
     private:
-        List<Topic<TYPE> *> topicsList_;
+        ListArray<Topic<TYPE> *> topicsList_;
 
     public:
         TopicRouter() {}

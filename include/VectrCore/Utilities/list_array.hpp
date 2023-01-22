@@ -125,8 +125,7 @@ namespace VCTR
          * @brief   Will copy the items in the given list into the list. The number of items to be copied is the size of the array being copied.
          * @returns reference to this array.
         */
-        template <typename TYPE2>
-        List<TYPE> &operator=(const List<TYPE2> &listB);
+        List<TYPE> &operator=(const List<TYPE> &listB);
 
         /**
          * This will cut down the size of the array if it is less than half full. Can cause heap fragmentation.
@@ -342,15 +341,14 @@ namespace VCTR
     }
 
     template <typename TYPE>
-    template <typename TYPE2>
-    List<TYPE>& ListArray<TYPE>::operator=(const List<TYPE2> &listB)
+    List<TYPE>& ListArray<TYPE>::operator=(const List<TYPE> &listB)
     {
 
         clear();
 
         // Copy items into ListArray
         for (size_t i = 0; i < listB.size(); i++)
-            append(ListArray[i]);
+            append(listB[i]);
 
         return *this;
     }

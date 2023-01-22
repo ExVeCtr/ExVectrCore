@@ -1,7 +1,7 @@
 #ifndef VECTRCORE_UTILITIES_TOPIC_H
 #define VECTRCORE_UTILITIES_TOPIC_H
 
-#include "list.hpp"
+#include "list_array.hpp"
 
 #include "stdint.h"
 
@@ -127,7 +127,7 @@ namespace VCTR
         void removeSubscriber(Subscriber_Interface<TYPE> *subscriber) const;
 
         // List of subscribers.
-        mutable List<Subscriber_Interface<TYPE> *> subscribers_;
+        mutable ListArray<Subscriber_Interface<TYPE> *> subscribers_;
 
         // TYPE latestItem;
     };

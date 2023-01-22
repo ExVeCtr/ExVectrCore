@@ -2,7 +2,7 @@
 #define VECTRCORE_UTILITIES_TOPICSUBSCRIBERS_H
 
 #include "topic.hpp"
-#include "buffer.hpp"
+#include "list_array.hpp"
 #include "scheduler.hpp"
 
 namespace VCTR
@@ -78,7 +78,7 @@ namespace VCTR
 
     private:
         // List of pointers to all subscribed topics.
-        List<const Topic<TYPE> *> subscribedTopics_;
+        ListArray<const Topic<TYPE> *> subscribedTopics_;
     };
 
     /**

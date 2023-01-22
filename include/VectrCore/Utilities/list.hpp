@@ -15,6 +15,8 @@ namespace VCTR
     class List
     {   
         public:
+
+        virtual ~List() {} //Virtual destructor. As needed due to inheretance of this class.
         
         /**
          * @brief Will return the size of the list. (Aka the length)
@@ -31,7 +33,7 @@ namespace VCTR
          * @brief Use this to access the items inside the list. Items cannot be modified!
          * @returns a const reference to the item at the given index.
         */
-        virtual const TYPE& operator[] (size_t index) = 0;
+        virtual const TYPE& operator[] (size_t index) const = 0;
 
         /**
          * @brief   Will copy the items in the given list into the list. The number of items to be copied is the size of the smaller array. 
@@ -39,19 +41,31 @@ namespace VCTR
          *          Not required to be implemented by child class but can improve performance by doing so.
          * @returns reference to this array.
         */
-        template<typename TYPE2>
-        virtual List<TYPE>& operator= (const List<TYPE2>& listB);
+        virtual List<TYPE>& operator= (const List<TYPE>& listB);
+        
+        /**
+         * @brief   Will copy the items in the given list into the list. The number of items to be copied is the size of the smaller array. 
+         *          As this function is receiving a list with a different data type. The data must be casted and the looping is slower. Are you sure about this?
+         * @returns reference to this array.
+        */
+        template <typename TYPE2>
+        List<TYPE>& operator= (const List<TYPE2>& listB);
     };
+
+    template<typename TYPE>
+    List<TYPE>& List<TYPE>::operator= (const List<TYPE>& listB) {
+
+        for (size_t i = 0; i < size() && i < listB.size(); i++) this->[i] = listB[i];
+
+        return *this;
+
+    }
 
     template<typename TYPE>
     template<typename TYPE2>
     List<TYPE>& List<TYPE>::operator= (const List<TYPE2>& listB) {
 
-        for (size_t i = 0; i < size() && i < listB.size()) {
-
-            this->operator[i] = listB[i];
-
-        }
+        for (size_t i = 0; i < size() && i < listB.size()) this->operator[i] = static_cast<TYPE>(listB[i]);
 
         return *this;
 

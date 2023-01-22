@@ -37,16 +37,16 @@ namespace VCTR
          */
         TimeSpan(uint32_t ns, uint32_t us, uint32_t ms = 0, uint32_t sec = 0, uint32_t min = 0, uint32_t hour = 0, uint32_t day = 0, uint32_t month = 0, uint32_t year = 0);
 
-        uint16_t year() const { return timespan / YEARS; }
+        uint16_t year() const { return static_cast<uint16_t>(timespan / YEARS); }
         uint8_t month() const { return timespan / MONTHS % 12; }
         // Day of month. Assumes all months have 30 days
         uint8_t day() const { return timespan / DAYS % 30; }
         uint8_t hour() const { return timespan / HOURS % 24; }
         uint8_t minute() const { return timespan / MINUTES % 60; }
         uint8_t second() const { return timespan / SECONDS % 60; }
-        uint8_t millisecond() const { return timespan / MILLISECONDS % 1000; }
-        uint8_t microsecond() const { return timespan / MICROSECONDS % 1000; }
-        uint8_t nanosecond() const { return timespan % 1000; }
+        uint16_t millisecond() const { return timespan / MILLISECONDS % 1000; }
+        uint16_t microsecond() const { return timespan / MICROSECONDS % 1000; }
+        uint16_t nanosecond() const { return timespan % 1000; }
 
         /**
          * @brief total Time span in nanoseconds
