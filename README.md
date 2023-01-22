@@ -4,7 +4,7 @@ VectrCore's main purpose is to add a hardware abstraction and control layer to a
 ## **This project is under initial development. Things will probably break.**
 ## Current goal roadmap:
 - [ ] Do everything -_-. This consists of below lines. Will probably be made more concrete in the future.
-- [ ] Port, modify and clean/fix utilities from EasyVTOL.
+- [X] Port, modify and clean/fix utilities from EasyVTOL.
 - [ ] Plan hardware abstraction layer (HAL).
 - [ ] Implement Basic HAL functions
 - [ ] Create Arduino HAL Implementation for testing (In external library. Not part of VectrCore).
