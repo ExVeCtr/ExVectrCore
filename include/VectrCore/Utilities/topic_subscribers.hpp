@@ -2,6 +2,7 @@
 #define VECTRCORE_UTILITIES_TOPICSUBSCRIBERS_H
 
 #include "topic.hpp"
+#include "buffer.hpp"
 #include "list_array.hpp"
 #include "scheduler.hpp"
 
@@ -39,7 +40,7 @@ namespace VCTR
          */
         void unsubcribe() override
         {
-            for (uint32_t i = 0; i < subscribedTopics_.getNumItems(); i++)
+            for (uint32_t i = 0; i < subscribedTopics_.size(); i++)
             {
                 subscribedTopics_[i]->removeSubscriber(this);
             }
@@ -72,7 +73,7 @@ namespace VCTR
          */
         void publish(TYPE const &item)
         {
-            for (uint32_t i = 0; i < subscribedTopics_.getNumItems(); i++)
+            for (uint32_t i = 0; i < subscribedTopics_.size(); i++)
                 subscribedTopics_[i]->publish(item, this);
         }
 
@@ -185,7 +186,7 @@ namespace VCTR
 
     /**
      * This subscriber implements a Fifo. New items are placed into Fifo front.
-     * @see Simple_Subscriber for receiving only one item and higher perfomance
+     * @see Simple_Subscriber for receiving only one item.
      *
      */
     template <typename TYPE, uint32_t SIZE>
@@ -367,6 +368,14 @@ namespace VCTR
         void removeTaskResume()
         {
             taskToResume_ = nullptr;
+        }
+
+        /**
+         * Sets which function to be called on item receive. Give a nullptr to disable.
+         * @param callbackFunc Function to be called and given received item
+        */
+        void setCallbackFunction(void (*callbackFunc)(TYPE const &item)) {
+            callbackFunc_ = callbackFunc;
         }
 
     private:

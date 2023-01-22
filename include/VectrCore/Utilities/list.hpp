@@ -55,7 +55,7 @@ namespace VCTR
     template<typename TYPE>
     List<TYPE>& List<TYPE>::operator= (const List<TYPE>& listB) {
 
-        for (size_t i = 0; i < size() && i < listB.size(); i++) this->[i] = listB[i];
+        for (size_t i = 0; i < size() && i < listB.size(); i++) (*this)[i] = listB[i];
 
         return *this;
 
