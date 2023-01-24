@@ -1,5 +1,5 @@
-#ifndef VECTRCORE_UTILITIES_DATETIME_H
-#define VECTRCORE_UTILITIES_DATETIME_H
+#ifndef VECTRCORE_DATETIME_H
+#define VECTRCORE_DATETIME_H
 
 #include "time_definitions.hpp"
 

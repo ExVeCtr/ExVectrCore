@@ -1,5 +1,5 @@
-#ifndef VECTRCORE_UTILITIES_SYSTEMTIME_H
-#define VECTRCORE_UTILITIES_SYSTEMTIME_H
+#ifndef VECTRCORE_SYSTEMTIME_H
+#define VECTRCORE_SYSTEMTIME_H
 
 #include "time_data.hpp"
 #include "time_definitions.hpp"
