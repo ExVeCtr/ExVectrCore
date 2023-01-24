@@ -1,7 +1,7 @@
 
 #include "VectrCore/time_system.hpp"
 
-#include "VectrCore/HardwareAbstraction/time_hal.hpp"
+#include "VectrHAL/time_hal.hpp"
 
 
 namespace 
