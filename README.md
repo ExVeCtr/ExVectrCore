@@ -1,6 +1,6 @@
-# VectrCore
-Part of the VECTR project. 
-VectrCore adds a suite of utilities for high level math, control and data flow.
+# ExVectrCore
+Part of the EXVECTR project. 
+ExVectrCore adds a suite of utilities for high level math, control and data flow.
 ## **This project is under initial development. Things will probably break.**
 ## Current goal roadmap:
 - [X] Port, modify and clean/fix utilities from EasyVTOL.

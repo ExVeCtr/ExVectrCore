@@ -1,5 +1,5 @@
-#ifndef VECTRCORE_LIST_H
-#define VECTRCORE_LIST_H
+#ifndef EXVECTRCORE_LIST_H
+#define EXVECTRCORE_LIST_H
 
 #include "stdint.h"
 

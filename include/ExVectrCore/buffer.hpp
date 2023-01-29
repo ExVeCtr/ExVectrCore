@@ -1,5 +1,5 @@
-#ifndef VECTRCORE_BUFFER_H
-#define VECTRCORE_BUFFER_H
+#ifndef EXVECTRCORE_BUFFER_H
+#define EXVECTRCORE_BUFFER_H
 
 #include "stdint.h"
 #include "math.h"

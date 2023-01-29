@@ -1,5 +1,5 @@
-#ifndef VECTRCORE_TOPIC_H
-#define VECTRCORE_TOPIC_H
+#ifndef EXVECTRCORE_TOPIC_H
+#define EXVECTRCORE_TOPIC_H
 
 #include "list_array.hpp"
 

@@ -1,5 +1,5 @@
-#ifndef VECTRCORE_SCHEDULER_H
-#define VECTRCORE_SCHEDULER_H
+#ifndef EXVECTRCORE_SCHEDULER_H
+#define EXVECTRCORE_SCHEDULER_H
 
 #include "list_array.hpp"
 #include "time_system.hpp"
