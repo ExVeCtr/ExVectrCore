@@ -1,5 +1,5 @@
 # ExVectrCore
-Part of the EXVECTR project. 
+Part of the ExVeCtr project. 
 ExVectrCore adds a suite of utilities for high level math, control and data flow.
 ## **This project is under initial development. Things will probably break.**
 ## Current goal roadmap:
