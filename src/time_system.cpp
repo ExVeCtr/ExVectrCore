@@ -1,7 +1,6 @@
 
 #include "ExVectrCore/time_system.hpp"
-
-#include "ExVectrHAL/time_hal.hpp"
+#include "ExVectrCore/time_base.hpp"
 
 
 namespace 
@@ -22,7 +21,7 @@ double VCTR::NOWSeconds() {
 
 
 int64_t VCTR::NOW() {
-    return internalTime() * timeFactor;
+    return timeBase() * timeFactor;
 }
 
 
