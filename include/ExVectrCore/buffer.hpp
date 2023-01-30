@@ -37,15 +37,10 @@ namespace VCTR
         /**
          * @returns number of elements in buffer
          */
-        inline size_t available() const;
+        inline size_t size() const;
 
         /**
-         * @returns number of empty spaces that can be filled.
-         */
-        inline size_t availableSpace() const;
-
-        /**
-         * Places a new element to the front of the buffer.
+         * Places a new element to the front of the buffer. AKA stack push.
          *
          * @param element element to be placed into buffer.
          * @param overwrite Overwrites elements at back if true. Default false.
@@ -54,7 +49,7 @@ namespace VCTR
         inline bool placeFront(const T &element, bool overwrite = false);
 
         /**
-         * Places a new element to the front of the buffer.
+         * Places a new element to the front of the buffer. AKA stack push.
          *
          * @param element element to be placed into buffer.
          * @param overwrite Overwrites elements at back if true. Default false.
@@ -63,7 +58,7 @@ namespace VCTR
         inline bool placeFront(const T &&element, bool overwrite = false);
 
         /**
-         * Places a new element to the back of the buffer.
+         * Places a new element to the back of the buffer. AKA enqueue item.
          *
          * @param element element to be placed into buffer.
          * @param overwrite Overwrites elements at front if true. Default false.
@@ -72,7 +67,7 @@ namespace VCTR
         inline bool placeBack(const T &element, bool overwrite = false);
 
         /**
-         * Places a new element to the back of the buffer.
+         * Places a new element to the back of the buffer. AKA enqueue item.
          *
          * @param element element to be placed into buffer.
          * @param overwrite Overwrites elements at front if true. Default false.
@@ -81,7 +76,7 @@ namespace VCTR
         inline bool placeBack(const T &&element, bool overwrite = false);
 
         /**
-         * Takes a element from the front of the buffer and places it into element.
+         * Takes a element from the front of the buffer and places it into element. AKA dequeue item.
          * peekFront() wont remove element.
          * Calling this on an empty buffer will simply return false.
          *
@@ -121,7 +116,7 @@ namespace VCTR
         inline bool peekBack(T &element);
 
         /**
-         * Removes the element at the front.
+         * Removes the element at the front. AKA dequeue.
          * Calling this on an empty buffer will do nothing.
          */
         inline void removeFront();
@@ -503,15 +498,9 @@ namespace VCTR
     }
 
     template <typename T, size_t size_>
-    inline size_t Buffer<T, size_>::available() const
+    inline size_t Buffer<T, size_>::size() const
     {
         return numElements_;
-    }
-
-    template <typename T, size_t size_>
-    inline size_t Buffer<T, size_>::availableSpace() const
-    {
-        return size_ - numElements_;
     }
 
     template <typename T, size_t size_>
