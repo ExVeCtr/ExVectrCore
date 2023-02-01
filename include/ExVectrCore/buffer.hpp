@@ -1,7 +1,7 @@
 #ifndef EXVECTRCORE_BUFFER_H
 #define EXVECTRCORE_BUFFER_H
 
-#include "stdint.h"
+#include "stddef.h"
 #include "math.h"
 
 namespace VCTR

@@ -6,6 +6,8 @@
 #include "topic.hpp"
 #include "topic_subscribers.hpp"
 
+#include "stddef.h"
+
 namespace VCTR
 {
 
@@ -48,7 +50,7 @@ namespace VCTR
     template <typename TYPE>
     void TopicRouter<TYPE>::receive(TYPE &item, const Topic<TYPE> *topic)
     {
-        for (uint32_t i = 0; i < topicsList_.size(); i++)
+        for (size_t i = 0; i < topicsList_.size(); i++)
         {
             Topic<TYPE> *topicForward = topicsList_[i];
             if (topicForward != &topic)

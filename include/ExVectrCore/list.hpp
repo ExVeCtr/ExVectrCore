@@ -1,7 +1,7 @@
 #ifndef EXVECTRCORE_LIST_H
 #define EXVECTRCORE_LIST_H
 
-#include "stdint.h"
+#include "stddef.h"
 
 namespace VCTR
 {
@@ -55,7 +55,9 @@ namespace VCTR
     template<typename TYPE>
     List<TYPE>& List<TYPE>::operator= (const List<TYPE>& listB) {
 
-        for (size_t i = 0; i < size() && i < listB.size(); i++) (*this)[i] = listB[i];
+        for (size_t i = 0; i < size() && i < listB.size(); i++) {
+            (*this)[i] = listB[i];
+        }
 
         return *this;
 
@@ -65,7 +67,9 @@ namespace VCTR
     template<typename TYPE2>
     List<TYPE>& List<TYPE>::operator= (const List<TYPE2>& listB) {
 
-        for (size_t i = 0; i < size() && i < listB.size()) this->operator[i] = static_cast<TYPE>(listB[i]);
+        for (size_t i = 0; i < size() && i < listB.size(); i++) {
+            (*this)[i] = static_cast<TYPE>(listB[i]);
+        }
 
         return *this;
 

@@ -1,7 +1,7 @@
 #ifndef EXVECTRCORE_LISTARRAY_H
 #define EXVECTRCORE_LISTARRAY_H
 
-#include "stdint.h"
+#include "stddef.h"
 
 #include "list.hpp"
 

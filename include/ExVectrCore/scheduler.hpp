@@ -4,6 +4,7 @@
 #include "list_array.hpp"
 #include "time_system.hpp"
 
+#include "stddef.h"
 #include "string.h"
 #include "stdint.h"
 
@@ -107,7 +108,7 @@ namespace VCTR
          */
         Task_Threading(const char *taskName, uint32_t priority, int64_t interval = 0, int64_t startTime = 0, bool dynamicPriority = false)
         {
-            strncpy_s(name_, taskName, 30);
+            strncpy(name_, taskName, 30);
             priority_ = priority;
             dynamicPriority_ = dynamicPriority;
             setTaskInterval(interval);

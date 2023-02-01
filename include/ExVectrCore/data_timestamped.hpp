@@ -20,7 +20,7 @@ namespace VCTR
         int64_t timestamp;
 
         DataTimestamped() {
-            timestamp = 0
+            timestamp = 0;
         }
 
         /**

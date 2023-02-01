@@ -3,7 +3,7 @@
 
 #include "list_array.hpp"
 
-#include "stdint.h"
+#include "stddef.h"
 
 namespace VCTR
 {
@@ -140,7 +140,7 @@ namespace VCTR
     template <typename TYPE>
     Topic<TYPE>::~Topic()
     {
-        for (uint32_t i = 0; i < subscribers_.size(); i++)
+        for (size_t i = 0; i < subscribers_.size(); i++)
             subscribers_[i]->unsubcribeTopic(*this);
     }
 
@@ -154,7 +154,7 @@ namespace VCTR
     void Topic<TYPE>::publish(const TYPE &item)
     {
         // latestItem = item;
-        for (uint32_t i = 0; i < subscribers_.size(); i++)
+        for (size_t i = 0; i < subscribers_.size(); i++)
         {
             if (subscribers_[i]->receiveItems_)
             {
@@ -166,21 +166,21 @@ namespace VCTR
     template <typename TYPE>
     void Topic<TYPE>::publish(const TYPE &&item)
     {
-        for (uint32_t i = 0; i < subscribers_.size(); i++)
+        for (size_t i = 0; i < subscribers_.size(); i++)
         {
             if (subscribers_[i]->receiveItems_)
             {
                 subscribers_[i]->receive(item, this);
             }
         }
-        // for (uint32_t i = 0; i < subscribers_.size(); i++) subscribers_[i]->receive(item, this);
+        // for (size_t i = 0; i < subscribers_.size(); i++) subscribers_[i]->receive(item, this);
     }
 
     template <typename TYPE>
     void Topic<TYPE>::publish(const TYPE &item, Subscriber_Interface<TYPE> *subscriber) const
     {
 
-        for (uint32_t i = 0; i < subscribers_.size(); i++)
+        for (size_t i = 0; i < subscribers_.size(); i++)
         {
             if (subscribers_[i] != subscriber && subscribers_[i]->receiveItems_)
                 subscribers_[i]->receive(item, this);

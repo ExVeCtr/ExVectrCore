@@ -6,6 +6,8 @@
 #include "list_array.hpp"
 #include "scheduler.hpp"
 
+#include "stddef.h"
+
 namespace VCTR
 {
 
@@ -40,7 +42,7 @@ namespace VCTR
          */
         void unsubcribe() override
         {
-            for (uint32_t i = 0; i < subscribedTopics_.size(); i++)
+            for (size_t i = 0; i < subscribedTopics_.size(); i++)
             {
                 subscribedTopics_[i]->removeSubscriber(this);
             }
@@ -73,7 +75,7 @@ namespace VCTR
          */
         void publish(TYPE const &item)
         {
-            for (uint32_t i = 0; i < subscribedTopics_.size(); i++)
+            for (size_t i = 0; i < subscribedTopics_.size(); i++)
                 subscribedTopics_[i]->publish(item, this);
         }
 
@@ -189,7 +191,7 @@ namespace VCTR
      * @see Simple_Subscriber for receiving only one item.
      *
      */
-    template <typename TYPE, uint32_t SIZE>
+    template <typename TYPE, size_t SIZE>
     class Buffer_Subscriber : public Subscriber_Generic<TYPE>, public Buffer<TYPE, SIZE>
     {
     public:

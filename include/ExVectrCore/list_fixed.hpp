@@ -1,7 +1,7 @@
 #ifndef EXVECTRCORE_LISTFIXED_H
 #define EXVECTRCORE_LISTFIXED_H
 
-#include "stdint.h"
+#include "stddef.h"
 
 #include "list.hpp"
 
