@@ -4,6 +4,7 @@ ExVectrCore adds a suite of utilities for program structure, control and data fl
 ## **This project is under initial development. Things will probably break.**
 ## Current goal roadmap:
 - [X] Port, modify and clean/fix utilities from EasyVTOL.
+- [ ] Add message and debug utilities.
 - [ ] Add event utilities.
 - [ ] Add timing utilities
 - [ ] Redo scheduling for use of event and timing utilities.
