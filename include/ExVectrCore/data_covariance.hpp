@@ -4,6 +4,9 @@
 namespace VCTR
 {
 
+namespace Core
+{
+
     /**
      * Simple container class for storing values together with their covariances.
      */
@@ -19,20 +22,20 @@ namespace VCTR
 
         /**
          * Standard Constructor
-        */
+         */
         DataCovariance();
 
         /**
          * covariance values are not set.
          * @param values Values.
-        */
+         */
         DataCovariance(const VALUETYPE &values);
 
         /**
          * covariance values are not set.
          * @param values Values.
          * @param covariance Covariance of values.
-        */
+         */
         DataCovariance(const VALUETYPE &values, const COVARIANCETYPE &covariance);
     };
 
@@ -53,6 +56,8 @@ namespace VCTR
         this->values = values;
         this->covariance = covariance;
     }
+
+}
 
 }
 

@@ -8,6 +8,9 @@
 namespace VCTR
 {
 
+namespace Core
+{
+
     /**
      * Buffer class that can be used as queue or stack.
      * Can also be used to sort values and calculate median, average, deviation.
@@ -621,6 +624,7 @@ namespace VCTR
         return true;
     }
 
+}
 } // namespace VCTR
 
 #endif

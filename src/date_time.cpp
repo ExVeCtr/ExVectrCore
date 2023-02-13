@@ -1,4 +1,4 @@
-#include "ExVectrCore/time_data.hpp"
+#include "ExVectrCore/time_units.hpp"
 
 #include "string.h"
 #include "stdio.h"
@@ -7,17 +7,17 @@
 #define SECONDS_FROM_1970_TO_2000 946684800
 
 
-VCTR::TimeSpan::TimeSpan(int64_t t_ns) {timespan = t_ns;}
+VCTR::Core::TimeSpan::TimeSpan(int64_t t_ns) {timespan = t_ns;}
 
-VCTR::TimeSpan::TimeSpan(uint32_t ns, uint32_t us, uint32_t ms, uint32_t sec, uint32_t min, uint32_t hour, uint32_t day, uint32_t month, uint32_t year) {
+VCTR::Core::TimeSpan::TimeSpan(uint32_t ns, uint32_t us, uint32_t ms, uint32_t sec, uint32_t min, uint32_t hour, uint32_t day, uint32_t month, uint32_t year) {
     timespan = ns + us*MICROSECONDS + ms*MILLISECONDS + sec*SECONDS + min*MINUTES + hour*HOURS + day*DAYS + month*MONTHS + year*YEARS;
 }
 
 
-const uint8_t VCTR::TimeDate::daysInMonth [] = { 31,28,31,30,31,30,31,31,30,31,30,31 };
+const uint8_t VCTR::Core::TimeDate::daysInMonth [] = { 31,28,31,30,31,30,31,31,30,31,30,31 };
 
 
-VCTR::TimeDate::TimeDate (uint32_t t) {
+VCTR::Core::TimeDate::TimeDate (uint32_t t) {
   t -= SECONDS_FROM_1970_TO_2000;    // bring to 2000 timestamp from 1970
 
     ss = t % 60;
@@ -44,7 +44,7 @@ VCTR::TimeDate::TimeDate (uint32_t t) {
     d = days + 1;
 }
 
-VCTR::TimeDate::TimeDate (uint16_t year, uint8_t month, uint8_t day, uint8_t hour, uint8_t min, uint8_t sec) {
+VCTR::Core::TimeDate::TimeDate (uint16_t year, uint8_t month, uint8_t day, uint8_t hour, uint8_t min, uint8_t sec) {
     if (year >= 2000)
         year -= 2000;
     yOff = year;
@@ -56,7 +56,7 @@ VCTR::TimeDate::TimeDate (uint16_t year, uint8_t month, uint8_t day, uint8_t hou
 }
 
 // supported formats are date "Mmm dd yyyy" and time "hh:mm:ss" (same as __DATE__ and __TIME__)
-VCTR::TimeDate::TimeDate(const char* date, const char* time) {
+VCTR::Core::TimeDate::TimeDate(const char* date, const char* time) {
    static const char month_names[] = "JanFebMarAprMayJunJulAugSepOctNovDec";
    static char buff[4] = {'0','0','0','0'};
    int y;
@@ -67,7 +67,7 @@ VCTR::TimeDate::TimeDate(const char* date, const char* time) {
 }
 
 // UNIX time: IS CORRECT ONLY WHEN SET TO UTC!!!
-uint32_t VCTR::TimeDate::unixtime(void) const {
+uint32_t VCTR::Core::TimeDate::unixtime(void) const {
   uint32_t t;
   uint16_t days = date2days(yOff, m, d);
   t = time2long(days, hh, mm, ss);
@@ -76,7 +76,7 @@ uint32_t VCTR::TimeDate::unixtime(void) const {
   return t;
 }
 
-uint16_t VCTR::TimeDate::date2days(uint16_t y, uint8_t m, uint8_t d) {
+uint16_t VCTR::Core::TimeDate::date2days(uint16_t y, uint8_t m, uint8_t d) {
     if (y >= 2000)
         y -= 2000;
     uint16_t days = d;
@@ -87,11 +87,11 @@ uint16_t VCTR::TimeDate::date2days(uint16_t y, uint8_t m, uint8_t d) {
     return days + 365 * y + (y + 3) / 4 - 1;
 }
 
-long VCTR::TimeDate::time2long(uint16_t days, uint8_t h, uint8_t m, uint8_t s) {
+long VCTR::Core::TimeDate::time2long(uint16_t days, uint8_t h, uint8_t m, uint8_t s) {
     return ((days * 24L + h) * 60 + m) * 60 + s;
 }
 
-bool VCTR::TimeDate::isleapYear(const uint8_t y) {
+bool VCTR::Core::TimeDate::isleapYear(const uint8_t y) {
     if(y&3)//check if divisible by 4
         return false;
     //only check other, when first failed
@@ -99,35 +99,35 @@ bool VCTR::TimeDate::isleapYear(const uint8_t y) {
 }
 
 
-VCTR::TimeSpan operator - (VCTR::TimeDate const& A, VCTR::TimeDate const& B) {
+VCTR::Core::TimeSpan operator - (VCTR::Core::TimeDate const& A, VCTR::Core::TimeDate const& B) {
 
-    return VCTR::TimeSpan((int64_t) A.unixtime() * VCTR::SECONDS - B.unixtime() * VCTR::SECONDS);
-
-}
-
-
-VCTR::TimeDate operator + (VCTR::TimeDate const& A, VCTR::TimeSpan const& B) {
-
-    return VCTR::TimeDate(A.unixtime() + B.nanosecondsTime() / VCTR::SECONDS);
+    return VCTR::Core::TimeSpan((int64_t) A.unixtime() * VCTR::Core::SECONDS - B.unixtime() * VCTR::Core::SECONDS);
 
 }
 
 
-VCTR::TimeDate operator - (VCTR::TimeDate const& A, VCTR::TimeSpan const& B) {
+VCTR::Core::TimeDate operator + (VCTR::Core::TimeDate const& A, VCTR::Core::TimeSpan const& B) {
 
-    return VCTR::TimeDate(A.unixtime() - (B.nanosecondsTime() / VCTR::SECONDS));
+    return VCTR::Core::TimeDate(A.unixtime() + B.nanosecondsTime() / VCTR::Core::SECONDS);
 
 }
 
 
-bool operator > (VCTR::TimeDate const& A, VCTR::TimeDate const& B) {
+VCTR::Core::TimeDate operator - (VCTR::Core::TimeDate const& A, VCTR::Core::TimeSpan const& B) {
+
+    return VCTR::Core::TimeDate(A.unixtime() - (B.nanosecondsTime() / VCTR::Core::SECONDS));
+
+}
+
+
+bool operator > (VCTR::Core::TimeDate const& A, VCTR::Core::TimeDate const& B) {
 
     return A.nanosecondsTime() > B.nanosecondsTime();
 
 }
 
 
-bool operator < (VCTR::TimeDate const& A, VCTR::TimeDate const& B) {
+bool operator < (VCTR::Core::TimeDate const& A, VCTR::Core::TimeDate const& B) {
 
     return A.nanosecondsTime() < B.nanosecondsTime();
 

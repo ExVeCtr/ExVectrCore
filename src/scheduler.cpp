@@ -1,15 +1,15 @@
 #include "ExVectrCore/scheduler.hpp"
 
 
-int64_t VCTR::Task_Threading::systemResourceCalcTimestamp_;
-float VCTR::Task_Threading::schedulerUsage_;
-float VCTR::Task_Threading::sleepPercent_ = 0;
-void (*VCTR::Task_Threading::sleepFunction_)(int64_t) = nullptr;
-int64_t VCTR::Task_Threading::timeSpentSleeping_ = 0;
+int64_t VCTR::Core::Task_Threading::systemResourceCalcTimestamp_;
+float VCTR::Core::Task_Threading::schedulerUsage_;
+float VCTR::Core::Task_Threading::sleepPercent_ = 0;
+void (*VCTR::Core::Task_Threading::sleepFunction_)(int64_t) = nullptr;
+int64_t VCTR::Core::Task_Threading::timeSpentSleeping_ = 0;
 
 
 
-void VCTR::Task_Threading::schedulerInitTasks() {
+void VCTR::Core::Task_Threading::schedulerInitTasks() {
 
     for (uint32_t i = 0; i < taskList().size(); i++) {
         taskList()[i]->initWasCalled_ = true;
@@ -19,7 +19,7 @@ void VCTR::Task_Threading::schedulerInitTasks() {
 }
 
 
-void VCTR::Task_Threading::schedulerTick() {
+void VCTR::Core::Task_Threading::schedulerTick() {
 
     if (taskList().size() == 0) return;
 
@@ -171,7 +171,7 @@ void VCTR::Task_Threading::schedulerTick() {
 
 
 
-VCTR::ListArray<VCTR::Task_Threading*>& VCTR::Task_Threading::taskList() {
+VCTR::Core::ListArray<VCTR::Core::Task_Threading*>& VCTR::Core::Task_Threading::taskList() {
 
     static ListArray<Task_Threading*> taskList_g = ListArray<Task_Threading*>();
 
