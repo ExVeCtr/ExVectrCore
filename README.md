@@ -5,9 +5,9 @@ ExVectrCore adds a suite of utilities for program structure, control and data fl
 ## ToDo:
 - [X] Port, modify and clean/fix utilities from EasyVTOL.
 - [X] Add support for multiple time sources (One is internal/Precise) ~~!! High priority from Scheduler !!~~
-- [ ] Add some string or character system. (Needed for debugging and message utilities)
-- [ ] Add message and debug utilities.
-- [ ] ~~Add event utilities.~~ Topics makes this pretty much redundant.              
+- [-] ~~Add some string or character system. (Needed for debugging and message utilities)~~ Would be too inefficient and not really needed.
+- [X] Add message and debug utilities.
+- [-] ~~Add event utilities.~~ Topics makes this pretty much redundant.              
 - [ ] Redo scheduling for use of new tasks and time sources utilities.    !! Currently broken. Upmost priority !!
 - [ ] Documentation.
 ## To be implemented into a platform library:
