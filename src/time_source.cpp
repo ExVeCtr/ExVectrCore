@@ -9,7 +9,7 @@ VCTR::Core::Time_Source::Time_Source(Clock_Source &source, float correctionAmoun
 }
 
 int64_t VCTR::Core::Time_Source::NOW() {
-    return NOW()*factor_ + offset_;
+    return int64_t(VCTR::Core::NOW()*factor_) + offset_;
 }
 
 double VCTR::Core::Time_Source::NOWSeconds() {
