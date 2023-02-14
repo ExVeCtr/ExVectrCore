@@ -60,6 +60,12 @@ namespace VCTR
             inline size_t getInternalArrayLength() const;
 
             /**
+             * @note Do not modify or delete in any form.
+             * @returns internal array pointer.
+            */
+            inline const TYPE* getPtr() const;
+
+            /**
              * Adds a copy of the given item to the ListArray.
              * @param item Item to add to ListArray.
              */
@@ -196,6 +202,11 @@ namespace VCTR
         inline size_t ListArray<TYPE>::getInternalArrayLength() const
         {
             return maxSize_;
+        }
+
+        template <typename TYPE>
+        inline const TYPE* ListArray<TYPE>::getPtr() const {
+            return array_;
         }
 
         template <typename TYPE>
