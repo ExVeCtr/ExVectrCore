@@ -26,6 +26,12 @@ namespace VCTR
             virtual size_t size() const = 0;
 
             /**
+             * @brief adds the given item to the list
+             * @param item
+            */
+            virtual void append(const TYPE& item) = 0;
+
+            /**
              * @brief Use this to access the items inside the list.
              * @returns a reference to the item at the given index.
              */

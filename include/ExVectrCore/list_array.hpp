@@ -69,7 +69,7 @@ namespace VCTR
              * Adds a copy of the given item to the ListArray.
              * @param item Item to add to ListArray.
              */
-            void append(const TYPE &item);
+            void append(const TYPE &item) override;
 
             /**
              * Adds a copy of the given item to the ListArray only if there is no other equal item already in the ListArray.
