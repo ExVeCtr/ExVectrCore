@@ -12,7 +12,7 @@ namespace
 
 
 int64_t VCTR::Core::NOW() {
-    return VCTR::Core::getPlatformClock().getCounter().data;
+    return VCTR::Core::getPlatformClock().getCounter();
 }
 
 
