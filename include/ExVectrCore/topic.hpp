@@ -1,9 +1,8 @@
 #ifndef EXVECTRCORE_TOPIC_H
 #define EXVECTRCORE_TOPIC_H
 
-#include "list_array.hpp"
-
 #include "stddef.h"
+#include "list_array.hpp"
 
 namespace VCTR
 {

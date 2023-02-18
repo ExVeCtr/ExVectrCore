@@ -1,12 +1,12 @@
 #ifndef EXVECTRCORE_TOPICROUTERS_H
 #define EXVECTRCORE_TOPICROUTERS_H
 
+#include "stddef.h"
+
 #include "list_array.hpp"
 
 #include "topic.hpp"
 #include "topic_subscribers.hpp"
-
-#include "stddef.h"
 
 namespace VCTR
 {
