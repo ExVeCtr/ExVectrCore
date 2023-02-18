@@ -4,7 +4,7 @@
 #include "topic.hpp"
 #include "buffer.hpp"
 #include "list_array.hpp"
-#include "scheduler.hpp"
+#include "task.hpp"
 
 #include "stddef.h"
 
@@ -100,14 +100,14 @@ namespace VCTR
 
             TYPE receivedItem;
 
-            Task_Threading *taskToResume_ = nullptr;
+            Task *taskToResume_ = nullptr;
 
             void receive(TYPE const &item, const Topic<TYPE> *topic) override
             {
                 receivedItem = item;
                 itemIsNew = true;
                 if (taskToResume_ != nullptr)
-                    taskToResume_->suspendUntil(NOW());
+                    taskToResume_->setPaused(false);
             }
 
         public:
@@ -135,7 +135,7 @@ namespace VCTR
             /**
              * Will resume given task if an item is recieved.
              */
-            void setTaskToResume(Task_Threading &task)
+            void setTaskToResume(Task &task)
             {
                 taskToResume_ = &task;
             }
@@ -156,12 +156,12 @@ namespace VCTR
         class Topic_Publisher : public Subscriber_Generic<TYPE>
         {
         private:
-            Task_Threading *taskToResume_ = nullptr;
+            Task *taskToResume_ = nullptr;
 
             void receive(TYPE const &item, const Topic<TYPE> *topic) override
             {
                 if (taskToResume_ != nullptr)
-                    taskToResume_->suspendUntil(NOW());
+                    taskToResume_->setPaused(false);
             }
 
         public:
@@ -175,7 +175,7 @@ namespace VCTR
             /**
              * Will resume given task if an item is recieved.
              */
-            void setTaskToResume(Task_Threading &task)
+            void setTaskToResume(Task &task)
             {
                 taskToResume_ = &task;
             }
@@ -218,7 +218,7 @@ namespace VCTR
             /**
              * Will resume given task if an item is recieved.
              */
-            void setTaskToResume(Task_Threading &task)
+            void setTaskToResume(Task &task)
             {
                 taskToResume_ = &task;
             }
@@ -236,12 +236,12 @@ namespace VCTR
             {
                 this->placeFront(item, overwrite_);
                 if (taskToResume_ != nullptr)
-                    taskToResume_->suspendUntil(NOW());
+                    taskToResume_->setPaused(false);
             }
 
             bool overwrite_ = false;
 
-            Task_Threading *taskToResume_ = nullptr;
+            Task *taskToResume_ = nullptr;
         };
 
         /**
@@ -304,7 +304,7 @@ namespace VCTR
              * Will resume given task if an item is recieved.
              * Callback will be called first, then task is resumed.
              */
-            void setTaskToResume(Task_Threading &task)
+            void setTaskToResume(Task &task)
             {
                 taskToResume_ = &task;
             }
@@ -323,13 +323,13 @@ namespace VCTR
                 if (callbackFunc_ != nullptr && object_ != nullptr)
                     (object_->*callbackFunc_)(item);
                 if (taskToResume_ != nullptr)
-                    taskToResume_->suspendUntil(NOW());
+                    taskToResume_->setPaused(false);
             }
 
             void (CALLBACKTYPE::*callbackFunc_)(const TYPE &) = nullptr;
             CALLBACKTYPE *object_ = nullptr;
 
-            Task_Threading *taskToResume_ = nullptr;
+            Task *taskToResume_ = nullptr;
         };
 
         /**
@@ -362,7 +362,7 @@ namespace VCTR
              * Will resume given task if an item is recieved.
              * Callback will be called first, then task is resumed.
              */
-            void setTaskToResume(Task_Threading &task)
+            void setTaskToResume(Task &task)
             {
                 taskToResume_ = &task;
             }
@@ -390,12 +390,12 @@ namespace VCTR
                 if (callbackFunc_ != nullptr)
                     callbackFunc_(item);
                 if (taskToResume_ != nullptr)
-                    taskToResume_->suspendUntil(NOW());
+                    taskToResume_->setPaused(false);
             }
 
             void (*callbackFunc_)(TYPE const &item) = nullptr;
 
-            Task_Threading *taskToResume_ = nullptr;
+            Task *taskToResume_ = nullptr;
         };
 
     }
