@@ -27,7 +27,7 @@ namespace VCTR
             /**
              * Gets the current clocks time in nanoseconds timestamped with internal precise. Might be slow if using an external clock source.
              */
-            virtual const int64_t getCounter() const = 0;
+            virtual const Timestamped<int64_t>& getCounter() const = 0;
 
             /**
              * Gets the topic to use for receiving new time information.
