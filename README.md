@@ -26,5 +26,6 @@ Also it should not be used on critical long life applications due to the experim
 - [ ] Documentation.
 ## To be implemented into a platform library:
 A platform library is required for the ExVectrCore to run. The following functions must be implemented inside a .cpp file:
-- `getPlatformClock();` Found inside the `time_base.hpp` header file
+- `getPlatformClock();` Found inside the `time_base.hpp` header file.
+- `void initialise();` Found inside the main `ExVectrCore.hpp` header file. This is used to initialise the internals of the platform implementation.
 Yes thats all that currently need to be implemented. Literally max. 20 minutes to research and implement.
