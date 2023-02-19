@@ -22,7 +22,16 @@ Also it should not be used on critical long life applications due to the experim
 - [X] ~~Add some string or character system. (Needed for debugging and message utilities)~~ Would be too inefficient and not really needed.
 - [X] Add message and debug utilities.
 - [X] ~~Add event utilities.~~ Topics makes this pretty much redundant.              
-- [ ] Redo scheduling for use of new tasks and time sources utilities.    !! Currently broken. Upmost priority !!
+- [X] Redo scheduling for use of new tasks and time sources utilities.    !! Currently broken. Upmost priority !!+
+- [ ] Create math library
+- [ ] Create data processing and structure library.
+- [ ] Create memory libary (Storing memory onto EEPROM or Other stuff)
+- [ ] Create sensor library.
+- [ ] Create networking library.
+- [ ] Finally implement starship test vehicle. (Probably create a vehicle library)
+- [ ] Simulation library. 
+- [ ] Create irrigation library. 
+- [ ] 3D graphics library for simulations?
 - [ ] Documentation.
 ## To be implemented into a platform library:
 A platform library is required for the ExVectrCore to run. The following functions must be implemented inside a .cpp file:
