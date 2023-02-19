@@ -88,11 +88,15 @@ namespace VCTR
             const ListArray<TaskData> &getTasks();
 
             /**
-             * Main processing function. Sorts through tasks and calls the ones needing to be ran.
+             * Finds the task that needs to be ran next and returns its release time.
+            */
+            int64_t getNextTaskRelease();
+
+            /**
+             * Main processing function. Sorts through tasks and calls the one with highest priority.
              * @note To be called as fast and often as possible to meet timing requirements
-             * @returns when the next task is expected to run.
              */
-            int64_t tick();
+            void tick();
 
         private:
 
@@ -102,7 +106,7 @@ namespace VCTR
              * @param task 
              * @returns the pseudo priority
             */
-            virtual uint32_t getTaskPseudoPriority(const TaskData& task);
+            virtual int32_t getTaskPseudoPriority(const TaskData& task);
 
         };
 

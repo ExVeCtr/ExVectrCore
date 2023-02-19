@@ -41,7 +41,7 @@ namespace VCTR
             /// @brief Will skip missed timings.
             bool skipOverdueRun_ = true;
             /// @brief Name of task
-            char taskName_[30];
+            char taskName_[50];
 
         public:
             /**

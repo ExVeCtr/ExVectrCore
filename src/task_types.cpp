@@ -13,7 +13,9 @@ VCTR::Core::Task_Periodic::Task_Periodic(const char *taskName, int64_t interval_
     deadline_ = start;
     skipOverdueRun_ = skipOverdueRun;
 
-    strncpy(taskName_, taskName, 20);
+    strncpy(taskName_, taskName, 50);
+    taskName_[49] = '\0'; //Make sure end.
+
 }
 
 const char *VCTR::Core::Task_Periodic::taskName()

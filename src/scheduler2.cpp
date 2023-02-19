@@ -66,10 +66,24 @@ bool VCTR::Core::Scheduler::addTask(Task &task)
 
 bool VCTR::Core::Scheduler::removeTask(Task &task)
 {
-    return tasks_.removeAllEqual(TaskData(&task));
+    
+    bool found = false;
+
+    for (size_t i = 0; i < tasks_.size(); i++) {
+
+        if (tasks_[i].task == &task) {
+            found = true;
+            tasks_.removeAtIndex(i);
+            taskIndexRun_.removeAllEqual(i);
+            i--;
+        }
+
+    }
+
+    return found;
 }
 
-uint32_t VCTR::Core::Scheduler::getTaskPseudoPriority(const VCTR::Core::Scheduler::TaskData &task)
+int32_t VCTR::Core::Scheduler::getTaskPseudoPriority(const VCTR::Core::Scheduler::TaskData &task)
 {
 
     uint64_t den = task.avgTaskLength_ns + task.task->getDeadline() - task.task->getRelease();
@@ -77,15 +91,28 @@ uint32_t VCTR::Core::Scheduler::getTaskPseudoPriority(const VCTR::Core::Schedule
     if (den == 0)
         den = 1;
 
-    return static_cast<uint32_t>((NOW() - task.task->getRelease() + (task.task->getPriority() + task.misses) * VCTR::Core::MICROSECONDS) / den);
+    return static_cast<int32_t>((NOW() - task.task->getRelease() + (task.task->getPriority() + task.misses) * VCTR::Core::MICROSECONDS) / den);
 }
 
-int64_t VCTR::Core::Scheduler::tick()
+int64_t VCTR::Core::Scheduler::getNextTaskRelease()
+{
+
+    int64_t earliest = VCTR::Core::END_OF_TIME;
+    for (size_t i = 0; i < tasks_.size(); i++)
+    {
+        if (tasks_[i].task->getRelease() < earliest)
+            earliest = tasks_[i].task->getRelease();
+    }
+
+    return earliest;
+}
+
+void VCTR::Core::Scheduler::tick()
 {
 
     // Let tasks check their runtime.
     for (size_t i = 0; i < tasks_.size(); i++)
-    {   
+    {
         if (tasks_[i].task == nullptr)
         {
             VCTR::Core::printE("Scheduler with a nullptr task! Removing!");
@@ -96,28 +123,12 @@ int64_t VCTR::Core::Scheduler::tick()
         tasks_[i].task->taskCheck();
     }
 
-    // Sort by release time. Yes this is insertion sort with a runtime of O(n^2) but since the array is kept and not changed much between runs
-    // then insertion sort has a general runtime of o(n) which is fairly fast.
-    for (size_t i = 1; i < tasks_.size(); i++)
-    {
-        auto task = tasks_[i];
-        size_t a = tasks_[i].task->getRelease();
-        size_t j = i;
-        while (j > 0 && tasks_[j - 1].task->getRelease() > a)
-        {
-            tasks_[j] = tasks_[j - 1];
-            j--;
-        }
-        tasks_[j] = task;
-    }
-
     for (size_t i = 0; i < tasks_.size(); i++) // Add only the tasks that need to be ran
     {
 
-        tasks_[i].task->taskCheck(); // Let task check if it needs to be ran and update pause and timings
-
         if (!tasks_[i].task->getPaused() && NOW() > tasks_[i].task->getRelease())
         {
+
             taskIndexRun_.appendIfNotInListArray(i);
         }
     }
@@ -127,7 +138,8 @@ int64_t VCTR::Core::Scheduler::tick()
         tasks_[taskIndexRun_[i]].pseudoPriority = getTaskPseudoPriority(tasks_[taskIndexRun_[i]]);
     }
 
-    // Sort by pseudo priority. Insertion sort again.
+    // Sort by pseudo priority. Yes this is insertion sort with a runtime of O(n^2) but since the array is kept and not changed much between runs
+    // then insertion sort has a general runtime of nearly o(n) when slightly modified. Which is fairly fast.
     for (size_t i = 1; i < taskIndexRun_.size(); i++)
     {
         size_t index = taskIndexRun_[i];
@@ -155,16 +167,12 @@ int64_t VCTR::Core::Scheduler::tick()
         taskRun.task->taskRun();
 
         tasks_[taskIndexRun_[taskIndexRun_.size() - 1]].misses = 0;
-        taskIndexRun_.removeAtIndex(taskIndexRun_.size() - 1); // Should be efficient as item is at back of list.
+        bool t = taskIndexRun_.removeAtIndex(taskIndexRun_.size() - 1); // Should be efficient as item is at back of list.
 
         // Increase misses counter for all other tasks.
         for (size_t i = 0; i < taskIndexRun_.size(); i++)
         {
             tasks_[taskIndexRun_[i]].misses++;
         }
-
-    } 
-
-    return tasks_.size() > 0 ? tasks_[0].task->getRelease() : VCTR::Core::END_OF_TIME;
-
+    }
 }
