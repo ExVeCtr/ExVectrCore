@@ -30,7 +30,7 @@ namespace VCTR
             // Pointer to start of array.
             TYPE *array_ = nullptr;
 
-            // Wether to reduce array size automatically.
+            // Whether to reduce array size automatically.
             bool sizeControl_ = false;
 
         public:
@@ -109,9 +109,9 @@ namespace VCTR
             /**
              * Removes all items in ListArray equal to given item
              * @param index Index of item to be removed
-             * @returns true if found and removed. False if not.
+             * @returns number of items foound and removed.
              */
-            bool removeAllEqual(const TYPE &item);
+            size_t removeAllEqual(const TYPE &item);
 
             /**
              * Removes all items in ListArray.
@@ -312,10 +312,10 @@ namespace VCTR
         }
 
         template <typename TYPE>
-        bool ListArray<TYPE>::removeAllEqual(const TYPE &item)
+        size_t ListArray<TYPE>::removeAllEqual(const TYPE &item)
         {
 
-            bool foundOne = false;
+            size_t found = 0;
 
             // Find index of item
             for (size_t i = 0; i < size_; i++)
@@ -325,11 +325,11 @@ namespace VCTR
                 {
 
                     removeAtIndex(i);
-                    foundOne = true;
+                    found++;
                 }
             }
 
-            return foundOne;
+            return found;
         }
 
         template <typename TYPE>
