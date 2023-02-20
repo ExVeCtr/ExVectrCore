@@ -13,16 +13,16 @@ As above mentioned, ExVeCtr can be used for pretty much anything. ExVeCtr places
 For example: if I have an interesting idea for a drone propeller orientation, all I need to do is implement the system dynamics using an interface class. With that the drone is ready to fly as all the other functionality (sensor fusion, control etc.) is expecting simply the same interface. This also allows the programmer to fully and easily customise the system however they wish.
 ## When should ExVeCtr not be used?
 Due to the design constraints to create a unified structure, we pay the cost of performance. ExVeCtr could run on an Arduino Uno board but would probably be much faster without. 
-Also it should not be used on critical long life applications due to the experimental nature and some tradoffs like the used of dynamic arrays that can cause heap fragmentation. 
+Also it should not be used on critical long life applications due to the experimental nature and some trade-offs like the used of dynamic arrays that can cause heap fragmentation. 
 
 ## **This project is under initial development. Things will probably break.**
 ## ToDo:
 - [X] Port, modify and clean/fix utilities from EasyVTOL.
-- [X] Add support for multiple time sources (One is internal/Precise) ~~!! High priority from Scheduler !!~~
+- [X] Add support for multiple time sources ~~(One is internal/Precise) !! High priority from Scheduler !!~~
 - [X] ~~Add some string or character system. (Needed for debugging and message utilities)~~ Would be too inefficient and not really needed.
 - [X] Add message and debug utilities.
 - [X] ~~Add event utilities.~~ Topics makes this pretty much redundant.              
-- [X] Redo scheduling for use of new tasks and time sources utilities.    !! Currently broken. Upmost priority !!+
+- [X] Redo scheduling for use of new tasks and time sources utilities.    ~~!! Currently broken. Upmost priority !!~~
 - [ ] Create math library
 - [ ] Create data processing and structure library.
 - [ ] Create memory libary (Storing memory onto EEPROM or Other stuff)
