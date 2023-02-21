@@ -154,13 +154,10 @@ namespace VCTR
         void ListArray<TYPE>::reduceSize()
         {
 
-            if (size_ >= maxSize_ / 2)
+            if (size_ > maxSize_ / 2)
                 return;
 
-            size_t newSize = size_;
-
-            while (size_ < maxSize_ / 2)
-                newSize /= 2;
+            size_t newSize = size_/2;
 
             changeSizeTo(newSize);
         }
