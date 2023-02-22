@@ -23,7 +23,7 @@ Also it should not be used on critical long life applications due to the experim
 - [X] Add message and debug utilities.
 - [X] ~~Add event utilities.~~ Topics makes this pretty much redundant.              
 - [X] Redo scheduling for use of new tasks and time sources utilities.    ~~!! Currently broken. Upmost priority !!~~
-- [ ] Create math library
+- [X] Create math library
 - [ ] Create data processing and structure library.
 - [ ] Create memory libary (Storing memory onto EEPROM or Other stuff)
 - [ ] Create sensor library.
