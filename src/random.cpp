@@ -4,7 +4,7 @@
 #include "math.h"
 
 
-uint16_t VCTR::Core::randGen(uint16_t max = UINT16_MAX, uint32_t seed = 0) {
+size_t VCTR::Core::randGen(size_t max, uint32_t seed) {
 
     static uint32_t lastVal = 12312;
     if (seed != 0) lastVal = seed % (123124 * 5 / 7);
@@ -17,15 +17,15 @@ uint16_t VCTR::Core::randGen(uint16_t max = UINT16_MAX, uint32_t seed = 0) {
 
 //Generates a random number from 0 to 1.
 float randGenFloat() {
-    return ( (float)(VCTR::Core::randGen()) + 1. )/( (float)(UINT16_MAX) + 1. );
+    return ( (float)(VCTR::Core::randGen(UINT16_MAX)) + 1.0f )/( (float)(UINT16_MAX) + 1.0f );
 }
 
 
-float VCTR::Core::randNorm(float sigma = 1, float mi = 0) {
+float VCTR::Core::randNorm(float sigma, float mi) {
 
     float v1=randGenFloat();
     float v2=randGenFloat();
-    return cos(2.0f*3.14f*v2)*sqrt(-2.0f*log(v1)) * sigma + mi;
+    return cosf(2.0f*3.14f*v2)*sqrtf(-2.0f*logf(v1)) * sigma + mi;
 
 }
 
