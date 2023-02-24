@@ -13,10 +13,10 @@ namespace VCTR
          * @brief Generates a random 16bit unsigned integer up to the given max (excluding max and including 0). Giving a seed will reset the generator using the given seed.
          *
          * @param max Maximum number to generate (Exclusive). Defaults to max value of size_t (Really damn big!).
-         * @param seed Starting seed and resetting algorithm if other than 0.
+         * @param seed
          * @return size_t
          */
-        extern size_t randGen(size_t max = SIZE_MAX, uint32_t seed = 0);
+        extern size_t randGen(size_t max = SIZE_MAX, size_t seed = 0);
 
         /**
          * @brief Generates a normally distributed random number.
