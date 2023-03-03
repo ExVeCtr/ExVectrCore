@@ -1,7 +1,7 @@
 #ifndef EXVECTRCORE_RANDOM_H
 #define EXVECTRCORE_RANDOM_H
 
-#include "stdint.h"
+#include "stddef.h"
 
 namespace VCTR
 {
