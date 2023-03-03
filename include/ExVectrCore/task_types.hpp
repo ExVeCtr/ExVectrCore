@@ -38,6 +38,8 @@ namespace VCTR
             int64_t timeSlip_ns_ = 0;
             /// @brief When this task should run.
             int64_t deadline_ = 0;
+            /// @brief Offsets the time to stay in tact with the starting time.
+            int64_t offset_ = 0;
             /// @brief Will skip missed timings.
             bool skipOverdueRun_ = true;
             /// @brief Name of task
@@ -52,6 +54,16 @@ namespace VCTR
              * @param skipOverdueRun If true, then in the case the task has not ran for a few cycles, then the task will only run once. If false then the task will run the amount of times missed.
              */
             Task_Periodic(const char *taskName, int64_t interval_ns, int64_t start = NOW(), int64_t timeSlip_ns = 1 * MILLISECONDS, bool skipOverdueRun = true);
+
+            /**
+             * Set the task interval in nanoseconds.
+            */
+            void setInterval(int64_t internal_ns);
+            
+            /**
+             * Does what is says. Returns the task interval in nanoseconds.
+            */
+            int64_t getInterval();
 
             /**
              * @returns a char array for the name of the task.
