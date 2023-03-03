@@ -1,32 +1,25 @@
 #include "ExVectrCore/random.h"
 
-
 #include "math.h"
 
+size_t VCTR::Core::randGen(size_t max, size_t seed)
+{
 
-uint16_t VCTR::Core::randGen(uint16_t max = UINT16_MAX, uint32_t seed = 0) {
-
-    static uint32_t lastVal = 12312;
-    if (seed != 0) lastVal = seed % (123124 * 5 / 7);
-
-    lastVal = (lastVal * 1231 - 5123) % 123124;
-
+    static size_t lastVal = 12312;
+    lastVal = ((lastVal + seed) * 16807ull) % 2147483647ull;
     return lastVal % max;
-
 }
 
-//Generates a random number from 0 to 1.
-float randGenFloat() {
-    return ( (float)(VCTR::Core::randGen()) + 1. )/( (float)(UINT16_MAX) + 1. );
+// Generates a random number from 0 to 1.
+float randGenFloat()
+{
+    return ((float)(VCTR::Core::randGen(UINT16_MAX)) + 1.0f) / ((float)(UINT16_MAX) + 1.0f);
 }
 
+float VCTR::Core::randNorm(float sigma, float mi)
+{
 
-float VCTR::Core::randNorm(float sigma = 1, float mi = 0) {
-
-    float v1=randGenFloat();
-    float v2=randGenFloat();
-    return cos(2.0f*3.14f*v2)*sqrt(-2.0f*log(v1)) * sigma + mi;
-
+    float v1 = randGenFloat();
+    float v2 = randGenFloat();
+    return cosf(2.0f * 3.14f * v2) * sqrtf(-2.0f * logf(v1)) * sigma + mi;
 }
-
-

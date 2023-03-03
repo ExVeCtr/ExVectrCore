@@ -23,7 +23,7 @@ Also it should not be used on critical long life applications due to the experim
 - [X] Add message and debug utilities.
 - [X] ~~Add event utilities.~~ Topics makes this pretty much redundant.              
 - [X] Redo scheduling for use of new tasks and time sources utilities.    ~~!! Currently broken. Upmost priority !!~~
-- [ ] Create math library
+- [X] Create math library
 - [ ] Create data processing and structure library.
 - [ ] Create memory libary (Storing memory onto EEPROM or Other stuff)
 - [ ] Create sensor library.
@@ -33,8 +33,11 @@ Also it should not be used on critical long life applications due to the experim
 - [ ] Create irrigation library. 
 - [ ] 3D graphics library for simulations?
 - [ ] Documentation.
+## Issues:
+- [ ] Time units must be redone.
 ## To be implemented into a platform library:
 A platform library is required for the ExVectrCore to run. The following functions must be implemented inside a .cpp file:
 - `getPlatformClock();` Found inside the `time_base.hpp` header file.
 - `void initialise();` Found inside the main `ExVectrCore.hpp` header file. This is used to initialise the internals of the platform implementation.
 Yes thats all that currently need to be implemented. Literally max. 20 minutes to research and implement.
+For systems that must use HAL features, these must also be implemented, but are optional depending on what is available on that platform.
