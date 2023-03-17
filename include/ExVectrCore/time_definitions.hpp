@@ -35,6 +35,14 @@ namespace VCTR
         */
         extern double NOWSeconds();
 
+        /**
+         * @brief Blocks everything for given amount of time in nanoseconds.
+         * @note DO NOT USE. WASTES CPU TIME AND BLOCKS ALL OTHER THINGS THAT NEED THE TIME! Only included to support older code. Will be removed in the future!
+         * @note Possible that in the future this will yield the given time to other threads. Will probably be removed though.
+         * @param delay_ns Time in nanoseconds.
+         */
+        extern void delay(int64_t delay_ns);
+
     }
 
 }
