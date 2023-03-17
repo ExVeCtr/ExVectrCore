@@ -1,6 +1,7 @@
 #include "ExVectrCore/random.h"
 
 #include "math.h"
+#include "stdint.h"
 
 size_t VCTR::Core::randGen(size_t max, size_t seed)
 {
@@ -12,8 +13,9 @@ size_t VCTR::Core::randGen(size_t max, size_t seed)
 
 // Generates a random number from 0 to 1.
 float randGenFloat()
-{
-    return ((float)(VCTR::Core::randGen(__UINT16_MAX__)) + 1.0f) / ((float)(__UINT16_MAX__) + 1.0f);
+{   
+    //Note: (uint16_t)-1 is the maximum size of a 16 bit unsigned integer. This is the more portable methode of the constant UINT16_MAX
+    return ((float)(VCTR::Core::randGen((uint16_t)-1)) + 1.0f) / ((float)((uint16_t)-1) + 1.0f);
 }
 
 float VCTR::Core::randNorm(float sigma, float mi)
