@@ -16,7 +16,7 @@ namespace VCTR
          * @param seed
          * @return size_t
          */
-        extern size_t randGen(size_t max = SIZE_MAX, size_t seed = 0);
+        extern size_t randGen(size_t max = __SIZE_MAX__, size_t seed = 0);
 
         /**
          * @brief Generates a normally distributed random number.
