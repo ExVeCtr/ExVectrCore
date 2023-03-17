@@ -13,7 +13,7 @@ size_t VCTR::Core::randGen(size_t max, size_t seed)
 // Generates a random number from 0 to 1.
 float randGenFloat()
 {
-    return ((float)(VCTR::Core::randGen(UINT16_MAX)) + 1.0f) / ((float)(UINT16_MAX) + 1.0f);
+    return ((float)(VCTR::Core::randGen(__UINT16_MAX__)) + 1.0f) / ((float)(__UINT16_MAX__) + 1.0f);
 }
 
 float VCTR::Core::randNorm(float sigma, float mi)
