@@ -22,9 +22,9 @@ namespace VCTR
             // Timestamp for data in nanoseconds
             int64_t timestamp;
 
-            Timestamped()
+            Timestamped(int64_t timestamp = 0)
             {
-                timestamp = 0;
+                this->timestamp = timestamp;
             }
 
             /**
