@@ -19,6 +19,11 @@ namespace VCTR
         Topic<const char*>& getMessageTopic();
 
         /**
+         * Topic that will publish messages.
+        */
+        Topic<const char*>& getDebugTopic();
+
+        /**
          * Topic that will publish warnings.
         */
         Topic<const char*>& getWarningTopic();
@@ -39,6 +44,12 @@ namespace VCTR
          * @note Works similar to printf(format, values...)
         */
         void printM(const char* format, ...);
+
+        /**
+         * Prints a debug message to whatever output is setup as console.
+         * @note Works similar to printf(format, values...)
+        */
+        void printD(const char* format, ...);
 
         /**
          * Prints a warning to whatever output is setup as console.

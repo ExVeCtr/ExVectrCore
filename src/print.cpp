@@ -119,6 +119,12 @@ VCTR::Core::Topic<const char *> &VCTR::Core::getMessageTopic()
     return topic;
 }
 
+VCTR::Core::Topic<const char *> &VCTR::Core::getDebugTopic()
+{
+    static Topic<const char *> topic;
+    return topic;
+}
+
 VCTR::Core::Topic<const char *> &VCTR::Core::getWarningTopic()
 {
     static Topic<const char *> topic;
@@ -149,6 +155,18 @@ void VCTR::Core::printTopic(VCTR::Core::Topic<const char *> &topic, const char *
 void VCTR::Core::printM(const char *format, ...)
 {
     currentTopic = &VCTR::Core::getMessageTopic();
+
+    va_list va;
+    va_start(va, format);
+    const int ret = vprintf(format, va);
+    va_end(va);
+
+    currentTopic = nullptr;
+}
+
+void VCTR::Core::printD(const char *format, ...)
+{
+    currentTopic = &VCTR::Core::getDebugTopic();
 
     va_list va;
     va_start(va, format);
