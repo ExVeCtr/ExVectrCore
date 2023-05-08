@@ -61,24 +61,36 @@ const VCTR::Core::ListArray<VCTR::Core::Scheduler::TaskData> &VCTR::Core::Schedu
 
 bool VCTR::Core::Scheduler::addTask(Task &task)
 {
-    return tasks_.appendIfNotInListArray(TaskData(&task));
+    tasks_.appendIfNotInListArray(TaskData(&task));
+
+    if (tasks_.appendIfNotInListArray(TaskData(&task)))
+    {
+        task.scheduler_ = this;
+        return true;
+    }
+
+    return false;
 }
 
 bool VCTR::Core::Scheduler::removeTask(Task &task)
 {
-    
+
     bool found = false;
 
-    for (size_t i = 0; i < tasks_.size(); i++) {
+    for (size_t i = 0; i < tasks_.size(); i++)
+    {
 
-        if (tasks_[i].task == &task) {
+        if (tasks_[i].task == &task)
+        {
             found = true;
             tasks_.removeAtIndex(i);
             taskIndexRun_.removeAllEqual(i);
             i--;
         }
-
     }
+
+    if (found)
+        task.scheduler_ = nullptr;
 
     return found;
 }
@@ -139,7 +151,7 @@ void VCTR::Core::Scheduler::tick()
     }
 
     // Sort by pseudo priority. Yes this is insertion sort with a runtime of O(n^2) but since the array is kept and not changed much between runs
-    // then insertion sort has a general runtime of nearly o(n) when slightly modified. Which is fairly fast.
+    // then insertion sort has a general runtime of o(n) when almost sorted.
     for (size_t i = 1; i < taskIndexRun_.size(); i++)
     {
         size_t index = taskIndexRun_[i];
@@ -153,10 +165,14 @@ void VCTR::Core::Scheduler::tick()
         taskIndexRun_[j] = index;
     }
 
+    /*for (size_t i = 0; i < taskIndexRun_.size(); i++) {
+        Core::printM("Taskrun %d, %d\n", taskIndexRun_[i], tasks_[taskIndexRun_[i]].pseudoPriority);
+    }*/
+
     if (taskIndexRun_.size() > 0)
     { // Run highest task if there is one.
 
-        TaskData &taskRun = tasks_[taskIndexRun_[taskIndexRun_.size() - 1]];
+        TaskData& taskRun = tasks_[taskIndexRun_[taskIndexRun_.size() - 1]];
 
         if (!taskRun.task->getInitialised())
         {
@@ -164,12 +180,12 @@ void VCTR::Core::Scheduler::tick()
             taskRun.task->taskInit();
         }
 
+        tasks_[taskIndexRun_[taskIndexRun_.size() - 1]].misses = 0;
+        taskIndexRun_.removeAtIndex(taskIndexRun_.size() - 1); // Should be efficient, as item is at back of list.
+
         taskRun.task->taskRun();
 
-        tasks_[taskIndexRun_[taskIndexRun_.size() - 1]].misses = 0;
-        bool t = taskIndexRun_.removeAtIndex(taskIndexRun_.size() - 1); // Should be efficient as item is at back of list.
-
-        // Increase misses counter for all other tasks.
+        // Increase misses counter for all tasks.
         for (size_t i = 0; i < taskIndexRun_.size(); i++)
         {
             tasks_[taskIndexRun_[i]].misses++;

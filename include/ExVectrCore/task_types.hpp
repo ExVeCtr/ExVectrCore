@@ -15,16 +15,17 @@ namespace VCTR
 
         /**
          * Types of tasks to be implemented:
-         * - Periodic
+         * - Periodic *Finished*
          * - Static (Ran once)
+         * - TaskHandle (Will run anything)
          * - Scheduler task (Cascaded schedulers)
          */
 
         /**
          * A task that controls timing to be ran periodically at a given rate.
          * Functions to be implemented by inhereting application task:
-         *  - void init();
-         *  - void thread();
+         *  - void taskInit();
+         *  - void taskThread();
          *
          * @see Task interface for more information on these functions.
          *

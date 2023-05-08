@@ -11,6 +11,8 @@ namespace VCTR
 
     namespace Core
     {
+        //Forward declaration of scheduler
+        class Scheduler;
 
         /**
          * Abstract class for tasks to be called by scheduler.
@@ -22,6 +24,7 @@ namespace VCTR
          */
         class Task
         {
+        friend Scheduler;
         protected:
             /// @brief if true then scheduler will not call run()
             bool taskPaused_ = false;
@@ -33,6 +36,8 @@ namespace VCTR
             int64_t taskRelease_ = 0;
             /// @brief what the task priority is. Higher priorities are more likely to meet target timings for run().
             size_t taskPriority_ = 0;
+            ///@brief Scheduler calling this task. 
+            Scheduler* scheduler_ = nullptr;
 
         public:
 

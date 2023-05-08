@@ -13,6 +13,7 @@ int64_t VCTR::Core::Task::getDeadline() {
 
 void VCTR::Core::Task::setDeadline(int64_t deadline) {
     taskDeadline_ = deadline;
+    if (taskDeadline_ < taskRelease_) taskRelease_ = taskDeadline_;
 }
 
 int64_t VCTR::Core::Task::getRelease() {
@@ -21,6 +22,7 @@ int64_t VCTR::Core::Task::getRelease() {
 
 void VCTR::Core::Task::setRelease(int64_t release) {
     taskRelease_ = release;
+    if (taskRelease_ > taskDeadline_) taskDeadline_ = taskRelease_;
 }
 
 size_t VCTR::Core::Task::getPriority() {
