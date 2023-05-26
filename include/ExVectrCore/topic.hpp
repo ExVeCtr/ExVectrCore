@@ -34,7 +34,7 @@ namespace VCTR
 
             virtual ~Subscriber_Interface()
             {
-                // unsubcribe();
+                //unsubcribe();
             }
 
             /**
@@ -57,15 +57,15 @@ namespace VCTR
             virtual void unsubcribe() = 0;
 
             /**
-             * Will remove only given. Will not receive anymore data from this topic.
+             * Will remove only given topic. Will not receive anymore data from this topic.
              */
-            virtual void unsubcribeTopic(const Topic<TYPE> &topic) = 0;
+            virtual void unsubcribe(Topic<TYPE> &topic) = 0;
 
             /**
              * Subscribes to given topic. Will remove old subscription.
              * @param topic Topic to subscribe to.
              */
-            virtual void subscribe(const Topic<TYPE> &topic) = 0;
+            virtual void subscribe(Topic<TYPE> &topic) = 0;
 
             /**
              * Publishes an item to topic, but will not receive item. Makes it simpler to broadcast items from modules.
@@ -86,6 +86,10 @@ namespace VCTR
         class Topic
         {
             friend Subscriber_Generic<TYPE>;
+
+        private:
+            // List of subscribers.
+            ListArray<Subscriber_Interface<TYPE> *> subscribers_;
 
         public:
             Topic() {}
@@ -110,6 +114,17 @@ namespace VCTR
             void publish(const TYPE &&item);
 
             /**
+             * @brief Removes all subscribers subcribed to this topic.
+             */
+            void removeSubscriber();
+
+            /**
+             * @brief Removes the given subscriber.
+             * @param subscriber
+             */
+            void removeSubscriber(Subscriber_Interface<TYPE> &subscriber);
+
+            /**
              * @returns a copy of the last published item.
              */
             // const TYPE& getLatestItem();
@@ -120,16 +135,10 @@ namespace VCTR
              * @param item Item to be sent.
              * @param subscriber Subscriber to not receive item
              */
-            void publish(const TYPE &item, Subscriber_Interface<TYPE> *subscriber) const;
+            void publish(const TYPE &item, Subscriber_Interface<TYPE> *subscriber);
 
             // Is constant to allow modules to return const reference and others can subscribe but are unable to publish.
-            void addSubscriber(Subscriber_Interface<TYPE> *subscriber) const;
-
-            // Is constant to allow modules to return const reference and others can subscribe but are unable to publish.
-            void removeSubscriber(Subscriber_Interface<TYPE> *subscriber) const;
-
-            // List of subscribers.
-            mutable ListArray<Subscriber_Interface<TYPE> *> subscribers_;
+            void addSubscriber(Subscriber_Interface<TYPE> *subscriber);
 
             // TYPE latestItem;
         };
@@ -143,7 +152,7 @@ namespace VCTR
         Topic<TYPE>::~Topic()
         {
             for (size_t i = 0; i < subscribers_.size(); i++)
-                subscribers_[i]->unsubcribeTopic(*this);
+                subscribers_[i]->unsubcribe(*this);
         }
 
         template <typename TYPE>
@@ -179,7 +188,7 @@ namespace VCTR
         }
 
         template <typename TYPE>
-        void Topic<TYPE>::publish(const TYPE &item, Subscriber_Interface<TYPE> *subscriber) const
+        void Topic<TYPE>::publish(const TYPE &item, Subscriber_Interface<TYPE> *subscriber)
         {
 
             for (size_t i = 0; i < subscribers_.size(); i++)
@@ -190,7 +199,7 @@ namespace VCTR
         }
 
         template <typename TYPE>
-        void Topic<TYPE>::addSubscriber(Subscriber_Interface<TYPE> *subscriber) const
+        void Topic<TYPE>::addSubscriber(Subscriber_Interface<TYPE> *subscriber)
         {
             // Make sure not to have multiple subscribers. So remove.
             subscribers_.removeAllEqual(subscriber);
@@ -198,9 +207,14 @@ namespace VCTR
         }
 
         template <typename TYPE>
-        void Topic<TYPE>::removeSubscriber(Subscriber_Interface<TYPE> *subscriber) const
+        void Topic<TYPE>::removeSubscriber(Subscriber_Interface<TYPE> &subscriber)
         {
-            subscribers_.removeAllEqual(subscriber);
+            subscribers_.removeAllEqual(&subscriber);
+        }
+
+        template <typename TYPE>
+        void Topic<TYPE>::removeSubscriber() {
+            subscribers_.clear();
         }
 
     }
