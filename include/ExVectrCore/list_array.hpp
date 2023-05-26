@@ -52,24 +52,26 @@ namespace VCTR
                 }
             }
 
-            inline size_t size() const;
+            /**
+             * @brief Current length of the array.
+            */
+            size_t size() const override;
 
             /**
              * @returns current internal array size.
              */
-            inline size_t getInternalArrayLength() const;
+            size_t getInternalArrayLength() const;
 
             /**
-             * @note Do not modify or delete in any form.
              * @returns internal array pointer.
             */
-            inline const TYPE* getPtr() const;
+            const TYPE* getPtr() const;
 
             /**
              * Adds a copy of the given item to the ListArray.
              * @param item Item to add to ListArray.
              */
-            void append(const TYPE &item) override;
+            void append(const TYPE &item);
 
             /**
              * Adds a copy of the given item to the ListArray only if there is no other equal item already in the ListArray.
@@ -190,19 +192,19 @@ namespace VCTR
         }
 
         template <typename TYPE>
-        inline size_t ListArray<TYPE>::size() const
+        size_t ListArray<TYPE>::size() const
         {
             return size_;
         }
 
         template <typename TYPE>
-        inline size_t ListArray<TYPE>::getInternalArrayLength() const
+        size_t ListArray<TYPE>::getInternalArrayLength() const
         {
             return maxSize_;
         }
 
         template <typename TYPE>
-        inline const TYPE* ListArray<TYPE>::getPtr() const {
+        const TYPE* ListArray<TYPE>::getPtr() const {
             return array_;
         }
 
