@@ -2,6 +2,7 @@
 #define EXVECTRCORE_LIST_H
 
 #include "stddef.h"
+#include "stdint.h"
 
 namespace VCTR
 {
@@ -10,7 +11,7 @@ namespace VCTR
     {
 
         /**
-         * This is a abstract class for defining the interface for different list data types. Some examples are list array, list fixed, list linked, list ringbuffer.
+         * This is a abstract class for defining the interface for different list data types. Some examples are list array, list fixed.
          * Each different type has its pros and cons and different behaviors.
          * @param TYPE type of data to store in List
          */
@@ -26,12 +27,6 @@ namespace VCTR
             virtual size_t size() const = 0;
 
             /**
-             * @brief adds the given item to the list
-             * @param item
-            */
-            virtual void append(const TYPE& item) = 0;
-
-            /**
              * @brief Use this to access the items inside the list.
              * @returns a reference to the item at the given index.
              */
@@ -42,6 +37,19 @@ namespace VCTR
              * @returns a const reference to the item at the given index.
              */
             virtual const TYPE &operator[](size_t index) const = 0;
+
+            /**
+             * @brief Slower but safer list access methode. Will roll back to 0 if index goes over end. Negative values start from end of list.
+             * @returns a reference to the item at the given index.
+             */
+            virtual TYPE &operator()(int32_t index);
+
+            /**
+             * @brief Slower but safer list access methode. Will roll back to 0 if index goes over end. Negative values start from end of list.
+             * @note Const function. Returned item cannot be modified.
+             * @returns a reference to the item at the given index.
+             */
+            virtual const TYPE &operator()(int32_t index) const;
 
             /**
              * @brief   Will copy the items in the given list into the list. The number of items to be copied is the size of the smaller array.
@@ -59,6 +67,22 @@ namespace VCTR
             template <typename TYPE2>
             List<TYPE> &operator=(const List<TYPE2> &listB);
         };
+
+        template <typename TYPE>
+        TYPE &List<TYPE>::operator()(int32_t index)
+        {
+            auto len = size();
+            if (index < 0)
+                index = len + index;
+
+            return (*this)[index % len];
+        }
+
+        template <typename TYPE>
+        const TYPE &List<TYPE>::operator()(int32_t index) const
+        {
+            return (*this)(index);
+        }
 
         template <typename TYPE>
         List<TYPE> &List<TYPE>::operator=(const List<TYPE> &listB)
