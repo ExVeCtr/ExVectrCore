@@ -34,6 +34,7 @@ Also it should not be used on critical long life applications due to the experim
 - [ ] 3D graphics library for simulations?
 - [ ] Documentation.
 ## Issues:
+- [ ] High priority! Redo subscriber, topic system as it is currently unsafe!
 - [ ] Time units must be redone.
 ## To be implemented into a platform library:
 A platform library is required for the ExVectrCore to run. The following functions must be implemented inside a .cpp file:
