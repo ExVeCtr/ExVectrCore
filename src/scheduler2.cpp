@@ -155,7 +155,7 @@ void VCTR::Core::Scheduler::tick()
     for (size_t i = 1; i < taskIndexRun_.size(); i++)
     {
         size_t index = taskIndexRun_[i];
-        size_t prio = tasks_[index].pseudoPriority;
+        auto prio = tasks_[index].pseudoPriority;
         size_t j = i;
         while (j > 0 && tasks_[taskIndexRun_[j - 1]].pseudoPriority > prio)
         {
