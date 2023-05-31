@@ -24,8 +24,10 @@ Also it should not be used on critical long life applications due to the experim
 - [X] ~~Add event utilities.~~ Topics makes this pretty much redundant.              
 - [X] Redo scheduling for use of new tasks and time sources utilities.    ~~!! Currently broken. Upmost priority !!~~
 - [X] Create math library
-- [ ] Create data processing and structure library.
-- [ ] Create memory libary (Storing memory onto EEPROM or Other stuff)
+- [X] Create data processing and structure library.
+- [ ] Create a buffer data handling class for storing raw data into pointers.
+- [ ] Create a global message topic system.
+- [ ] Create memory library (Storing memory onto EEPROM or Other stuff)
 - [ ] Create sensor library.
 - [ ] Create networking library.
 - [ ] Finally implement starship test vehicle. (Probably create a vehicle library)
