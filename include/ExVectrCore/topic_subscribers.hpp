@@ -4,7 +4,6 @@
 #include "topic.hpp"
 #include "list_buffer.hpp"
 #include "list_array.hpp"
-#include "task.hpp"
 
 #include "stddef.h"
 
@@ -85,7 +84,6 @@ namespace VCTR
                 for (size_t i = 0; i < subscribedTopics_.size(); i++)
                     subscribedTopics_[i]->publish(item, this);
             }
-
         };
 
         /**
@@ -101,14 +99,10 @@ namespace VCTR
 
             TYPE receivedItem;
 
-            Task *taskToResume_ = nullptr;
-
             void receive(TYPE const &item, const Topic<TYPE> *topic) override
             {
                 receivedItem = item;
                 itemIsNew = true;
-                if (taskToResume_ != nullptr)
-                    taskToResume_->setPaused(false);
             }
 
         public:
@@ -133,21 +127,6 @@ namespace VCTR
                 return receivedItem;
             }
 
-            /**
-             * Will resume given task if an item is recieved.
-             */
-            void setTaskToResume(Task &task)
-            {
-                taskToResume_ = &task;
-            }
-
-            /**
-             * Stops resuming the given task that was being resumed.
-             */
-            void removeTaskResume()
-            {
-                taskToResume_ = nullptr;
-            }
         };
 
         /**
@@ -157,12 +136,10 @@ namespace VCTR
         class Topic_Publisher : public Subscriber_Generic<TYPE>
         {
         private:
-            Task *taskToResume_ = nullptr;
 
             void receive(TYPE const &item, const Topic<TYPE> *topic) override
             {
-                if (taskToResume_ != nullptr)
-                    taskToResume_->setPaused(false);
+                // Do nothing
             }
 
         public:
@@ -172,22 +149,6 @@ namespace VCTR
              * @param topic Topic to subscribe to.
              */
             Topic_Publisher(Topic<TYPE> &topic) : Subscriber_Generic<TYPE>(topic) {}
-
-            /**
-             * Will resume given task if an item is recieved.
-             */
-            void setTaskToResume(Task &task)
-            {
-                taskToResume_ = &task;
-            }
-
-            /**
-             * Stops resuming the given task that was being resumed.
-             */
-            void removeTaskResume()
-            {
-                taskToResume_ = nullptr;
-            }
         };
 
         /**
@@ -216,33 +177,13 @@ namespace VCTR
              */
             void setOverwrite(bool overwrite) { overwrite_ = overwrite; }
 
-            /**
-             * Will resume given task if an item is recieved.
-             */
-            void setTaskToResume(Task &task)
-            {
-                taskToResume_ = &task;
-            }
-
-            /**
-             * Stops resuming the given task that was being resumed.
-             */
-            void removeTaskResume()
-            {
-                taskToResume_ = nullptr;
-            }
-
         private:
             void receive(TYPE const &item, const Topic<TYPE> *topic) override
             {
                 this->placeFront(item, overwrite_);
-                if (taskToResume_ != nullptr)
-                    taskToResume_->setPaused(false);
             }
 
             bool overwrite_ = false;
-
-            Task *taskToResume_ = nullptr;
         };
 
         /**
@@ -302,36 +243,15 @@ namespace VCTR
                 return callbackFunc_;
             }*/
 
-            /**
-             * Will resume given task if an item is recieved.
-             * Callback will be called first, then task is resumed.
-             */
-            void setTaskToResume(Task &task)
-            {
-                taskToResume_ = &task;
-            }
-
-            /**
-             * Stops resuming the given task that was being resumed.
-             */
-            void removeTaskResume()
-            {
-                taskToResume_ = nullptr;
-            }
-
         private:
             void receive(TYPE const &item, const Topic<TYPE> *topic) override
             {
                 if (callbackFunc_ != nullptr && object_ != nullptr)
                     (object_->*callbackFunc_)(item);
-                if (taskToResume_ != nullptr)
-                    taskToResume_->setPaused(false);
             }
 
             void (CALLBACKTYPE::*callbackFunc_)(const TYPE &) = nullptr;
             CALLBACKTYPE *object_ = nullptr;
-
-            Task *taskToResume_ = nullptr;
         };
 
         /**
@@ -361,23 +281,6 @@ namespace VCTR
             }
 
             /**
-             * Will resume given task if an item is recieved.
-             * Callback will be called first, then task is resumed.
-             */
-            void setTaskToResume(Task &task)
-            {
-                taskToResume_ = &task;
-            }
-
-            /**
-             * Stops resuming the given task that was being resumed.
-             */
-            void removeTaskResume()
-            {
-                taskToResume_ = nullptr;
-            }
-
-            /**
              * Sets which function to be called on item receive. Give a nullptr to disable.
              * @param callbackFunc Function to be called and given received item
              */
@@ -391,13 +294,9 @@ namespace VCTR
             {
                 if (callbackFunc_ != nullptr)
                     callbackFunc_(item);
-                if (taskToResume_ != nullptr)
-                    taskToResume_->setPaused(false);
             }
 
             void (*callbackFunc_)(TYPE const &item) = nullptr;
-
-            Task *taskToResume_ = nullptr;
         };
 
     }

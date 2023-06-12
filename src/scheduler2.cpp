@@ -22,7 +22,7 @@ VCTR::Core::Scheduler::TaskData::TaskData()
     misses = 0;
 }
 
-VCTR::Core::Scheduler::TaskData::TaskData(Task *t)
+VCTR::Core::Scheduler::TaskData::TaskData(Scheduler::Task*t)
 {
     task = t;
     pseudoPriority = 0;
@@ -59,7 +59,7 @@ const VCTR::Core::ListArray<VCTR::Core::Scheduler::TaskData> &VCTR::Core::Schedu
     return tasks_;
 }
 
-bool VCTR::Core::Scheduler::addTask(Task &task)
+bool VCTR::Core::Scheduler::addTask(Scheduler::Task&task)
 {
     tasks_.appendIfNotInListArray(TaskData(&task));
 
@@ -72,7 +72,7 @@ bool VCTR::Core::Scheduler::addTask(Task &task)
     return false;
 }
 
-bool VCTR::Core::Scheduler::removeTask(Task &task)
+bool VCTR::Core::Scheduler::removeTask(Scheduler::Task&task)
 {
 
     bool found = false;
@@ -191,4 +191,62 @@ void VCTR::Core::Scheduler::tick()
             tasks_[taskIndexRun_[i]].misses++;
         }
     }
+}
+
+
+
+//Scheduler::Taskabstract functions
+
+
+VCTR::Core::Scheduler::Task::~Task() {
+    if (scheduler_ != nullptr)
+        scheduler_->removeTask(*this);
+}
+
+void VCTR::Core::Scheduler::Task::taskRun() {
+    taskThread();
+}
+
+void VCTR::Core::Scheduler::Task::taskCheck() {}
+
+int64_t VCTR::Core::Scheduler::Task::getDeadline() {
+    return taskDeadline_;
+}
+
+void VCTR::Core::Scheduler::Task::setDeadline(int64_t deadline) {
+    taskDeadline_ = deadline;
+    if (taskDeadline_ < taskRelease_) taskRelease_ = taskDeadline_;
+}
+
+int64_t VCTR::Core::Scheduler::Task::getRelease() {
+    return taskRelease_;
+}
+
+void VCTR::Core::Scheduler::Task::setRelease(int64_t release) {
+    taskRelease_ = release;
+    if (taskRelease_ > taskDeadline_) taskDeadline_ = taskRelease_;
+}
+
+size_t VCTR::Core::Scheduler::Task::getPriority() {
+    return taskPriority_;
+}
+
+void VCTR::Core::Scheduler::Task::setPriority(size_t priority) {
+    taskPriority_ = priority;
+}
+
+bool VCTR::Core::Scheduler::Task::getInitialised() {
+    return taskInitisalised_;
+}
+
+void VCTR::Core::Scheduler::Task::setInitialised(bool isInitialised) {
+    taskInitisalised_ = isInitialised;
+}
+
+bool VCTR::Core::Scheduler::Task::getPaused() {
+    return taskPaused_;
+}
+
+void VCTR::Core::Scheduler::Task::setPaused(bool pause) {
+    taskPaused_ = pause;
 }

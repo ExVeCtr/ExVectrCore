@@ -8,23 +8,20 @@
 #include "time_source.hpp"
 #include "time_base.hpp"
 
-#include "task.hpp"
-
 namespace VCTR
 {
 
     namespace Core
-    {
-
+    {   
+        
         /**
          * New Scheduler design features:
          * - Measure task runtime
-         * - Automatic schedule planning
-         * - No priorities, rather realtime importance.
-         * - Same timing structure as old system. (suspendUntil)
+         * - Automatic schedule planning (Finished)
+         * - No priorities, rather realtime importance. (Finished)
          * - Supports event triggers (Based off of events). This allows cascading tasks (Run if another has ran).
-         * - Timing relative to precise or accurate clock.
-         * - Support for sleep.
+         * - Timing relative to precise or accurate clock. (Finished)
+         * - Support for sleep. 
          * - Multiple schedulers for multi-core. (Maybe this allows for support of precise or accurate clock?)
          *
          * - Maybe AI search for optimal task planning?
@@ -36,7 +33,108 @@ namespace VCTR
          */
         class Scheduler
         {
+        public:
+
+            class Task
+            {
+            friend Scheduler;
+            protected:
+                /// @brief if true then scheduler will not call run()
+                bool taskPaused_ = false;
+                /// @brief if false the scheduler will call init() ASAP
+                bool taskInitisalised_ = false;
+                /// @brief latest time the scheduler should call run()
+                int64_t taskDeadline_ = 0;
+                /// @brief earliest time the scheduler should call run()
+                int64_t taskRelease_ = 0;
+                /// @brief what the task priority is. Higher priorities are more likely to meet target timings for run().
+                size_t taskPriority_ = 0;
+                ///@brief Scheduler calling this task. 
+                Scheduler* scheduler_ = nullptr;
+
+            public:
+
+                virtual ~Task();
+
+                /**
+                 * @returns a char array for the name of the task.
+                 */
+                virtual const char *taskName() = 0;
+
+                /**
+                 * Will be called by scheduler ASAP if isInitialised() returns false.
+                 */
+                virtual void taskInit() = 0;
+
+                /**
+                 * To be implemented by application tasks. Will be called by run().
+                 */
+                virtual void taskThread() = 0;
+
+                /**
+                 * To be implemented by each task type. Called by scheduler to allow task type to plan next run. Not to be implemented by application tasks.
+                 * @note Defaults to simply calling thread();
+                 */
+                virtual void taskRun();
+
+                /**
+                 * Scheduler will call this to allow the task to check if and when the task should run.
+                 */
+                virtual void taskCheck();
+
+                /**
+                 * Latest time the task can be called.
+                 */
+                int64_t getDeadline();
+
+                /**
+                 * Latest time the task can be called.
+                 */
+                void setDeadline(int64_t deadline);
+
+                /**
+                 * Earliest time the task can be called.
+                 */
+                int64_t getRelease();
+
+                /**
+                 * Earliest time the task can be called.
+                 */
+                void setRelease(int64_t release);
+
+                /**
+                 * Priority of the task. Higher is more likely to hit timing targets.
+                 */
+                size_t getPriority();
+
+                /**
+                 * Priority of the task. Higher is more likely to hit timing targets.
+                 */
+                void setPriority(size_t priority);
+
+                /**
+                 * init() will be called by scheduler if this returns false.
+                 */
+                bool getInitialised();
+
+                /**
+                 * init() will be called by scheduler if false.
+                 */
+                void setInitialised(bool isInitialised);
+
+                /**
+                 * @returns if task is currently paused.
+                 */
+                bool getPaused();
+
+                /**
+                 * task will not run if true
+                 */
+                void setPaused(bool pause);
+            };
+
         private:
+
             struct TaskData
             {
                 Task *task = nullptr;
