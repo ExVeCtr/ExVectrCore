@@ -2,6 +2,7 @@
 #define EXVECTRCORE_H_
 
 #include "ExVectrCore/scheduler2.hpp"
+#include "ExVectrCore/task_types.hpp"
 #include "ExVectrCore/print.hpp"
 #include "ExVectrCore/time_definitions.hpp"
 #include "ExVectrCore/topic.hpp"
