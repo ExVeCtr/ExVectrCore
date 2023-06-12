@@ -1,6 +1,12 @@
 #ifndef EXVECTRCORE_H_
 #define EXVECTRCORE_H_
 
+#include "ExVectrCore/scheduler2.hpp"
+#include "ExVectrCore/print.hpp"
+#include "ExVectrCore/time_definitions.hpp"
+#include "ExVectrCore/topic.hpp"
+#include "ExVectrCore/topic_subscribers.hpp"
+
 namespace VCTR
 {
     namespace Core
