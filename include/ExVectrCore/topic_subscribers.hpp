@@ -218,30 +218,15 @@ namespace VCTR
             }
 
             /**
-             * Sets what object to call the callback function on, on receive.
-             * @param objectPointer Which object to call the function on.
+             * @brief Sets the callback function and object to be called on receive.
+             * @param objectPointer Which object to call the callback function on.
+             * @param callbackFunc Which function to call on data receive. Returns void and parameter is <TYPE>& item.
              */
-            void setCallbackObject(CALLBACKTYPE *objectPointer)
+            void setCallback(CALLBACKTYPE *objectPointer, void (CALLBACKTYPE::*callbackFunc)(const TYPE &))
             {
                 object_ = objectPointer;
-            }
-
-            /**
-             * Sets what callback function to be called on receive.
-             * @note example: setCallbackFunction(&Foo::callbackFunc);
-             * @param callbackFunc Which function to call on receive.
-             */
-            void setCallbackFunction(void (CALLBACKTYPE::*callbackFunc)(const TYPE &))
-            {
                 callbackFunc_ = callbackFunc;
             }
-
-            /**
-             * @returns callback function to be called on receive. If none then returns nullptr.
-             */
-            /*void ()(TYPE& item) getCallbackFunction() {
-                return callbackFunc_;
-            }*/
 
         private:
             void receive(TYPE const &item, const Topic<TYPE> *topic) override
