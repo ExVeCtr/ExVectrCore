@@ -7,6 +7,14 @@ size_t VCTR::Core::randGen(size_t max, size_t seed)
 {
 
     static size_t lastVal = 12312;
+    static size_t seed_ = 0;
+
+    if (seed != seed_)
+    {
+        seed_ = seed;
+        lastVal = seed;
+    }
+
     lastVal = ((lastVal + seed) * 16807ull) % 2147483647ull;
     return lastVal % max;
 }
