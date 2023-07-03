@@ -4,14 +4,14 @@
 #include "stddef.h"
 #include "stdint.h"
 
-#include "task.hpp"
+#include "scheduler2.hpp"
 #include "time_definitions.hpp"
 
 namespace VCTR
 {
 
     namespace Core
-    {
+    {   
 
         /**
          * Types of tasks to be implemented:
@@ -27,10 +27,10 @@ namespace VCTR
          *  - void taskInit();
          *  - void taskThread();
          *
-         * @see Task interface for more information on these functions.
+         * @see Scheduler::Taskinterface for more information on these functions.
          *
          */
-        class Task_Periodic : public Task
+        class Task_Periodic : public Scheduler::Task
         {
         private:
             /// @brief Interval at which the task should be ran at in nanoseconds.

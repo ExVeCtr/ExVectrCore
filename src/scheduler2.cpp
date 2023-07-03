@@ -18,15 +18,13 @@ VCTR::Core::Scheduler::TaskData::TaskData()
 {
     task = nullptr;
     pseudoPriority = 0;
-    avgTaskLength_ns = 0;
     misses = 0;
 }
 
-VCTR::Core::Scheduler::TaskData::TaskData(Task *t)
+VCTR::Core::Scheduler::TaskData::TaskData(Scheduler::Task*t)
 {
     task = t;
     pseudoPriority = 0;
-    avgTaskLength_ns = 0;
     misses = 0;
 }
 
@@ -37,7 +35,6 @@ bool VCTR::Core::Scheduler::TaskData::operator==(const TaskData &b)
 
 VCTR::Core::Scheduler::TaskData &VCTR::Core::Scheduler::TaskData::operator=(const TaskData &b)
 {
-    avgTaskLength_ns = b.avgTaskLength_ns;
     pseudoPriority = b.pseudoPriority;
     misses = b.misses;
     task = b.task;
@@ -59,7 +56,7 @@ const VCTR::Core::ListArray<VCTR::Core::Scheduler::TaskData> &VCTR::Core::Schedu
     return tasks_;
 }
 
-bool VCTR::Core::Scheduler::addTask(Task &task)
+bool VCTR::Core::Scheduler::addTask(Scheduler::Task&task)
 {
     tasks_.appendIfNotInListArray(TaskData(&task));
 
@@ -72,7 +69,7 @@ bool VCTR::Core::Scheduler::addTask(Task &task)
     return false;
 }
 
-bool VCTR::Core::Scheduler::removeTask(Task &task)
+bool VCTR::Core::Scheduler::removeTask(Scheduler::Task&task)
 {
 
     bool found = false;
@@ -98,7 +95,7 @@ bool VCTR::Core::Scheduler::removeTask(Task &task)
 int32_t VCTR::Core::Scheduler::getTaskPseudoPriority(const VCTR::Core::Scheduler::TaskData &task)
 {
 
-    uint64_t den = task.avgTaskLength_ns + task.task->getDeadline() - task.task->getRelease();
+    uint64_t den = task.task->taskRuntime_ + task.task->getDeadline() - task.task->getRelease();
 
     if (den == 0)
         den = 1;
@@ -182,8 +179,20 @@ void VCTR::Core::Scheduler::tick()
 
         tasks_[taskIndexRun_[taskIndexRun_.size() - 1]].misses = 0;
         taskIndexRun_.removeAtIndex(taskIndexRun_.size() - 1); // Should be efficient, as item is at back of list.
+        taskRun.runCounter++;
 
+        int64_t taskStart = Core::NOW();
         taskRun.task->taskRun();
+        int64_t taskLength = Core::NOW() - taskStart;
+        taskRun.task->taskRuntime_ = taskRun.task->taskRuntime_*0.98 + taskLength*0.02;
+
+        if (Core::NOW() - taskRun.counterResetTimestamp >= 5*Core::SECONDS) {
+            float dTime = float(Core::NOW() - taskRun.counterResetTimestamp)/Core::SECONDS;
+
+            taskRun.task->taskRate_ = float(taskRun.runCounter)/dTime;
+            taskRun.counterResetTimestamp = Core::NOW();
+            taskRun.runCounter = 0;
+        }
 
         // Increase misses counter for all tasks.
         for (size_t i = 0; i < taskIndexRun_.size(); i++)
@@ -191,4 +200,70 @@ void VCTR::Core::Scheduler::tick()
             tasks_[taskIndexRun_[i]].misses++;
         }
     }
+}
+
+
+
+//Scheduler::Taskabstract functions
+
+
+VCTR::Core::Scheduler::Task::~Task() {
+    if (scheduler_ != nullptr)
+        scheduler_->removeTask(*this);
+}
+
+void VCTR::Core::Scheduler::Task::taskRun() {
+    taskThread();
+}
+
+void VCTR::Core::Scheduler::Task::taskCheck() {}
+
+int64_t VCTR::Core::Scheduler::Task::getDeadline() {
+    return taskDeadline_;
+}
+
+void VCTR::Core::Scheduler::Task::setDeadline(int64_t deadline) {
+    taskDeadline_ = deadline;
+    if (taskDeadline_ < taskRelease_) taskRelease_ = taskDeadline_;
+}
+
+int64_t VCTR::Core::Scheduler::Task::getRelease() {
+    return taskRelease_;
+}
+
+void VCTR::Core::Scheduler::Task::setRelease(int64_t release) {
+    taskRelease_ = release;
+    if (taskRelease_ > taskDeadline_) taskDeadline_ = taskRelease_;
+}
+
+size_t VCTR::Core::Scheduler::Task::getPriority() {
+    return taskPriority_;
+}
+
+void VCTR::Core::Scheduler::Task::setPriority(size_t priority) {
+    taskPriority_ = priority;
+}
+
+bool VCTR::Core::Scheduler::Task::getInitialised() {
+    return taskInitisalised_;
+}
+
+void VCTR::Core::Scheduler::Task::setInitialised(bool isInitialised) {
+    taskInitisalised_ = isInitialised;
+}
+
+bool VCTR::Core::Scheduler::Task::getPaused() {
+    return taskPaused_;
+}
+
+void VCTR::Core::Scheduler::Task::setPaused(bool pause) {
+    taskPaused_ = pause;
+}
+
+float VCTR::Core::Scheduler::Task::getRate() {
+    return taskRate_;
+}
+
+int64_t VCTR::Core::Scheduler::Task::getRuntime() {
+    return taskRuntime_;
 }
