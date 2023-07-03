@@ -39,6 +39,10 @@ namespace VCTR
             {
             friend Scheduler;
             protected:
+                /// @brief rate in Hz at which the task is actually being called.
+                float taskRate_ = 0;
+                /// @brief an average of how long the task takes to run in ns.
+                int64_t taskRuntime_ = 0;
                 /// @brief if true then scheduler will not call run()
                 bool taskPaused_ = false;
                 /// @brief if false the scheduler will call init() ASAP
@@ -131,15 +135,32 @@ namespace VCTR
                  * task will not run if true
                  */
                 void setPaused(bool pause);
+
+                /**
+                 * @returns the rate the task is actually being called at.
+                 */
+                float getRate();
+
+                /**
+                 * @returns the average time the task takes to run in ns.
+                 */
+                int64_t getRuntime();
+
             };
 
         private:
 
             struct TaskData
-            {
+            {   
+                /// @brief how many times the task has been called.
+                size_t runCounter = 0;
+                /// @brief time in ns of the last reset.
+                int64_t counterResetTimestamp = 0;
+                /// @brief Pointer to the task.
                 Task *task = nullptr;
+                /// @brief The pseudo priority of the task. Contains priority of timing, misses, and timeslot length.
                 int32_t pseudoPriority = 0;
-                int64_t avgTaskLength_ns = 0;
+                /// @brief The number of times the task was not called past its release time.
                 int32_t misses = 0; //The number of time the task could have ran but did not. Increments priority with every miss. Is reset when task is ran.
                 TaskData();
                 TaskData(Task* t);

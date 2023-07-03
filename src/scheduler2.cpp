@@ -18,7 +18,6 @@ VCTR::Core::Scheduler::TaskData::TaskData()
 {
     task = nullptr;
     pseudoPriority = 0;
-    avgTaskLength_ns = 0;
     misses = 0;
 }
 
@@ -26,7 +25,6 @@ VCTR::Core::Scheduler::TaskData::TaskData(Scheduler::Task*t)
 {
     task = t;
     pseudoPriority = 0;
-    avgTaskLength_ns = 0;
     misses = 0;
 }
 
@@ -37,7 +35,6 @@ bool VCTR::Core::Scheduler::TaskData::operator==(const TaskData &b)
 
 VCTR::Core::Scheduler::TaskData &VCTR::Core::Scheduler::TaskData::operator=(const TaskData &b)
 {
-    avgTaskLength_ns = b.avgTaskLength_ns;
     pseudoPriority = b.pseudoPriority;
     misses = b.misses;
     task = b.task;
@@ -98,7 +95,7 @@ bool VCTR::Core::Scheduler::removeTask(Scheduler::Task&task)
 int32_t VCTR::Core::Scheduler::getTaskPseudoPriority(const VCTR::Core::Scheduler::TaskData &task)
 {
 
-    uint64_t den = task.avgTaskLength_ns + task.task->getDeadline() - task.task->getRelease();
+    uint64_t den = task.task->taskRuntime_ + task.task->getDeadline() - task.task->getRelease();
 
     if (den == 0)
         den = 1;
@@ -182,8 +179,20 @@ void VCTR::Core::Scheduler::tick()
 
         tasks_[taskIndexRun_[taskIndexRun_.size() - 1]].misses = 0;
         taskIndexRun_.removeAtIndex(taskIndexRun_.size() - 1); // Should be efficient, as item is at back of list.
+        taskRun.runCounter++;
 
+        int64_t taskStart = Core::NOW();
         taskRun.task->taskRun();
+        int64_t taskLength = Core::NOW() - taskStart;
+        taskRun.task->taskRuntime_ = taskRun.task->taskRuntime_*0.98 + taskLength*0.02;
+
+        if (Core::NOW() - taskRun.counterResetTimestamp >= 5*Core::SECONDS) {
+            float dTime = float(Core::NOW() - taskRun.counterResetTimestamp)/Core::SECONDS;
+
+            taskRun.task->taskRate_ = float(taskRun.runCounter)/dTime;
+            taskRun.counterResetTimestamp = Core::NOW();
+            taskRun.runCounter = 0;
+        }
 
         // Increase misses counter for all tasks.
         for (size_t i = 0; i < taskIndexRun_.size(); i++)
@@ -249,4 +258,12 @@ bool VCTR::Core::Scheduler::Task::getPaused() {
 
 void VCTR::Core::Scheduler::Task::setPaused(bool pause) {
     taskPaused_ = pause;
+}
+
+float VCTR::Core::Scheduler::Task::getRate() {
+    return taskRate_;
+}
+
+int64_t VCTR::Core::Scheduler::Task::getRuntime() {
+    return taskRuntime_;
 }
