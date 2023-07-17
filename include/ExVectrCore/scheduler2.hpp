@@ -188,14 +188,15 @@ namespace VCTR
             Scheduler(Clock_Source& clockSource);
 
             /**
-             * Adds an item to the scheduler to be ran. In this case a Task.
-             * @param task The reference to task to be added to the Scheduler.
+             * Adds a task to the scheduler to be ran.
+             * @param task The task to be added to the Scheduler.
              * @returns true if successful.
              */
             bool addTask(Task &task);
 
             /**
              * Removes the given task from the scheduler.
+             * @note This will not delete the task. Tasks can also remove themselves from the scheduler.
              * @param task The reference to task to be removed from scheduler.
              * @returns true if found and removed. False if not found.
              */
