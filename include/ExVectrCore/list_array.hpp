@@ -54,7 +54,7 @@ namespace VCTR
 
             /**
              * @brief Current length of the array.
-            */
+             */
             size_t size() const override;
 
             /**
@@ -64,8 +64,8 @@ namespace VCTR
 
             /**
              * @returns internal array pointer.
-            */
-            const TYPE* getPtr() const;
+             */
+            const TYPE *getPtr() const;
 
             /**
              * Adds a copy of the given item to the ListArray.
@@ -143,6 +143,12 @@ namespace VCTR
              */
             void reduceSize();
 
+            /**
+             * @brief Changes the size of the array. If the new size is smaller than the current size, then the array will be truncated. If the new size is larger than the current size, then the array will be padded with default values.
+             * @param size New size of array.
+             */
+            void setSize(size_t size);
+
         private:
             /**
              * Changes size to given parameter.
@@ -159,9 +165,17 @@ namespace VCTR
             if (size_ > maxSize_ / 2)
                 return;
 
-            size_t newSize = size_/2;
+            size_t newSize = size_ / 2;
 
             changeSizeTo(newSize);
+        }
+
+        template <typename TYPE>
+        void ListArray<TYPE>::setSize(size_t size)
+        {
+
+            changeSizeTo(size);
+            size_ = size;
         }
 
         template <typename TYPE>
@@ -204,7 +218,8 @@ namespace VCTR
         }
 
         template <typename TYPE>
-        const TYPE* ListArray<TYPE>::getPtr() const {
+        const TYPE *ListArray<TYPE>::getPtr() const
+        {
             return array_;
         }
 
