@@ -100,6 +100,12 @@ namespace VCTR
             ListLinked &getListElement(size_t index = 0);
 
             /**
+             * @brief Gets the ListLinked at given index. Used to access the linked list like an array (index 0 is the ListLinked it is called on).
+             * @param index ListLinked to insert.
+             */
+            const ListLinked &getListElement(size_t index = 0) const;
+
+            /**
              * @brief Splits the list at given index.
              * @param index Index to split list at.
              * @return Beginning of list split off this list.
@@ -287,15 +293,28 @@ namespace VCTR
         }
 
         template <typename T>
+        const ListLinked<T> &ListLinked<T>::getListElement(size_t index) const
+        {
+
+            const ListLinked *next = this;
+            for (size_t i = 0; i < index && next_->next_ != nullptr; i++)
+            {
+                next = next->next_;
+            }
+
+            return *next;
+        }
+
+        template <typename T>
         T &ListLinked<T>::operator[](size_t index)
         {
-            return getListElement(index).data_;
+            return getListElement(index).item_;
         }
 
         template <typename T>
         const T &ListLinked<T>::operator[](size_t index) const
         {
-            return getListElement(index).data_;
+            return getListElement(index).item_;
         }
 
         /*template <typename T>

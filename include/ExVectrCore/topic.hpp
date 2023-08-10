@@ -2,7 +2,9 @@
 #define EXVECTRCORE_TOPIC_H
 
 #include "stddef.h"
-#include "list_array.hpp"
+// #include "list_array.hpp"
+#include "list_linked.hpp"
+#include "list_static.hpp"
 
 namespace VCTR
 {
@@ -14,27 +16,72 @@ namespace VCTR
         class Topic;
 
         template <typename TYPE>
-        class Subscriber_Generic;
+        class Subscriber;
+
+        template <typename TYPE>
+        class Topic final
+        {
+            friend Subscriber<TYPE>;
+
+        private:
+            // List of subscribers.
+            // ListArray<Subscriber_Interface<TYPE> *> subscribers_;
+            ListLinked<Subscriber<TYPE> *> *subListStart_ = nullptr;
+
+        public:
+            Topic() {}
+
+            ~Topic();
+
+            /**
+             * @returns list of all subscribers.
+             */
+            const List<Subscriber<TYPE> *> &getSubscriberList() const;
+
+            /**
+             * Sends item to all subscribers.
+             * @param item Item to be sent.
+             */
+            void publish(const TYPE &item);
+
+        private:
+            /**
+             * Publishes copy of item to subscribers except for given subscriber.
+             * @param item Item to be sent.
+             * @param subscriber Subscriber to not receive item
+             */
+            void publish(const TYPE &item, Subscriber<TYPE> *subscriber);
+
+            // TYPE latestItem;
+        };
 
         /**
-         * Interface class used by subscribers to receive topic data.
+         * Abstract class used by subscribers to receive topic data.
          * void receive(const TYPE& item, const Topic<TYPE>* topic) function must be implemented and will be called when receiving a published item.
          */
         template <typename TYPE>
-        class Subscriber_Interface
+        class Subscriber
         {
             friend Topic<TYPE>;
 
         private:
             // Topic should only give items if this is true.
             bool receiveItems_ = true;
+            // Element to topic subscriber list
+            ListLinked<Subscriber<TYPE> *> subListElement_;
+            // Topic this is subscribed to. Is nullptr if not subscribed.
+            Topic<TYPE> *subbedTopic_ = nullptr;
 
         public:
-            Subscriber_Interface() { receiveItems_ = true; }
-
-            virtual ~Subscriber_Interface()
+            Subscriber()
             {
-                //unsubcribe();
+                receiveItems_ = true;
+                subListElement_[0] = this;
+            }
+
+            virtual ~Subscriber()
+            {
+                unsubscribe();
             }
 
             /**
@@ -52,26 +99,20 @@ namespace VCTR
             bool isReceiveEnabled() { return receiveItems_; }
 
             /**
-             * Will remove all subscribtions. Will not receive anymore data.
+             * @brief Subscribes to given topic. Unsubscribes to previous subscriber.
+             * @param topic
              */
-            virtual void unsubcribe() = 0;
+            void subscribe(Topic<TYPE> &topic);
 
             /**
-             * Will remove only given topic. Will not receive anymore data from this topic.
+             * @brief Unsubscribes. Will not receive any more published items.
              */
-            virtual void unsubcribe(Topic<TYPE> &topic) = 0;
+            void unsubscribe();
 
             /**
-             * Subscribes to given topic. Will remove old subscription.
-             * @param topic Topic to subscribe to.
-             */
-            virtual void subscribe(Topic<TYPE> &topic) = 0;
-
-            /**
-             * Publishes an item to topic, but will not receive item. Makes it simpler to broadcast items from modules.
-             * @param item Item to publish
-             */
-            virtual void publish(TYPE const &item) = 0;
+             * @brief Publishes the given item to subscribed topic, but will not receive its item.
+            */
+            void publish(const TYPE &item);
 
         protected:
             /**
@@ -83,138 +124,114 @@ namespace VCTR
         };
 
         template <typename TYPE>
-        class Topic
-        {
-            friend Subscriber_Generic<TYPE>;
-
-        private:
-            // List of subscribers.
-            ListArray<Subscriber_Interface<TYPE> *> subscribers_;
-
-        public:
-            Topic() {}
-
-            virtual ~Topic();
-
-            /**
-             * @returns list of all subscribers.
-             */
-            const List<Subscriber_Interface<TYPE> *> &getSubscriberList() const;
-
-            /**
-             * Sends item to all subscribers.
-             * @param item Item to be sent.
-             */
-            void publish(const TYPE &item);
-
-            /**
-             * Sends copy of given item to all subscribers.
-             * @param item Item to be sent.
-             */
-            void publish(const TYPE &&item);
-
-            /**
-             * @brief Removes all subscribers subcribed to this topic.
-             */
-            void removeSubscriber();
-
-            /**
-             * @brief Removes the given subscriber.
-             * @param subscriber
-             */
-            void removeSubscriber(Subscriber_Interface<TYPE> &subscriber);
-
-            /**
-             * @returns a copy of the last published item.
-             */
-            // const TYPE& getLatestItem();
-
-        private:
-            /**
-             * Publishes copy of item to subscribers except for given subscriber.
-             * @param item Item to be sent.
-             * @param subscriber Subscriber to not receive item
-             */
-            void publish(const TYPE &item, Subscriber_Interface<TYPE> *subscriber);
-
-            // Is constant to allow modules to return const reference and others can subscribe but are unable to publish.
-            void addSubscriber(Subscriber_Interface<TYPE> *subscriber);
-
-            // TYPE latestItem;
-        };
-
-        /*template<typename TYPE>
-        const TYPE& Topic<TYPE>::getLatestItem() {
-            return latestItem;
-        }*/
-
-        template <typename TYPE>
         Topic<TYPE>::~Topic()
         {
-            for (size_t i = 0; i < subscribers_.size(); i++)
-                subscribers_[i]->unsubcribe(*this);
+
+            ListLinked<Subscriber<TYPE> *> *next = subListStart_;
+            while (next != nullptr && next != subListStart_)
+            {
+
+                (*next)[0]->unsubscribe();
+                next = next->getNext();
+            }
         }
 
         template <typename TYPE>
-        const List<Subscriber_Interface<TYPE> *> &Topic<TYPE>::getSubscriberList() const
+        const List<Subscriber<TYPE> *> &Topic<TYPE>::getSubscriberList() const
         {
-            return subscribers_;
+            if (subListStart_ == nullptr)
+            {
+                return ListStatic<Subscriber<TYPE> *, 0>();
+            }
+            return *subListStart_;
         }
 
         template <typename TYPE>
         void Topic<TYPE>::publish(const TYPE &item)
         {
-            // latestItem = item;
-            for (size_t i = 0; i < subscribers_.size(); i++)
+
+            ListLinked<Subscriber<TYPE> *> *next = subListStart_;
+            while (next != nullptr && next != subListStart_)
             {
-                if (subscribers_[i]->receiveItems_)
+
+                if ((*next)[0]->receiveItems_)
                 {
-                    subscribers_[i]->receive(item, this);
+                    (*next)[0]->receive(item, this);
                 }
             }
         }
 
         template <typename TYPE>
-        void Topic<TYPE>::publish(const TYPE &&item)
+        void Topic<TYPE>::publish(const TYPE &item, Subscriber<TYPE> *subscriber)
         {
-            for (size_t i = 0; i < subscribers_.size(); i++)
+
+            ListLinked<Subscriber<TYPE> *> *next = subListStart_;
+            while (next != nullptr && next != subListStart_)
             {
-                if (subscribers_[i]->receiveItems_)
+
+                if ((*next)[0]->receiveItems_ && (*next)[0] != subscriber)
                 {
-                    subscribers_[i]->receive(item, this);
+                    (*next)[0]->receive(item, this);
                 }
             }
-            // for (size_t i = 0; i < subscribers_.size(); i++) subscribers_[i]->receive(item, this);
         }
 
         template <typename TYPE>
-        void Topic<TYPE>::publish(const TYPE &item, Subscriber_Interface<TYPE> *subscriber)
+        void Subscriber<TYPE>::publish(const TYPE &item)
         {
+            if (subbedTopic_ != nullptr)
+                subbedTopic_->publish(item, this);
+        }
 
-            for (size_t i = 0; i < subscribers_.size(); i++)
+        template <typename TYPE>
+        void Subscriber<TYPE>::subscribe(Topic<TYPE> &topic)
+        {   
+
+            subbedTopic_ = &topic;
+
+            if (topic.subListStart_ == nullptr)
             {
-                if (subscribers_[i] != subscriber && subscribers_[i]->receiveItems_)
-                    subscribers_[i]->receive(item, this);
+                topic.subListStart_ = &subListElement_;
+                return;
             }
+
+            // Check if the subscriber is already in the list. Leave if it is.
+            ListLinked<Subscriber<TYPE> *> *next = topic.subListStart_;
+            while (next != nullptr && next != topic.subListStart_)
+            {
+                if ((*next)[0] == this)
+                {
+                    return;
+                }
+            }
+
+            topic.subListStart_->append(subListElement_);
+
         }
 
         template <typename TYPE>
-        void Topic<TYPE>::addSubscriber(Subscriber_Interface<TYPE> *subscriber)
+        void Subscriber<TYPE>::unsubscribe()
         {
-            // Make sure not to have multiple subscribers. So remove.
-            subscribers_.removeAllEqual(subscriber);
-            subscribers_.append(subscriber);
-        }
 
-        template <typename TYPE>
-        void Topic<TYPE>::removeSubscriber(Subscriber_Interface<TYPE> &subscriber)
-        {
-            subscribers_.removeAllEqual(&subscriber);
-        }
+            if (subbedTopic_ == nullptr) //Already not subscribed.
+                return; 
+            
+            if (subbedTopic_->subListStart_ == &subListElement_) //We are start of list. Set topic list begin to next element. If we are last then this will be nullptr.
+            {
+                subbedTopic_->subListStart_ == subListElement_.getNext();
+                subbedTopic_ = nullptr;
+                return;
+            }
 
-        template <typename TYPE>
-        void Topic<TYPE>::removeSubscriber() {
-            subscribers_.clear();
+            ListLinked<Subscriber<TYPE> *> *next = subbedTopic_->subListStart_;
+            while (next != nullptr && next != subbedTopic_->subListStart_)
+            {
+                if ((*next)[0] == this)
+                    (*next).remove();
+            }
+
+            subbedTopic_ = nullptr;
+
         }
 
     }

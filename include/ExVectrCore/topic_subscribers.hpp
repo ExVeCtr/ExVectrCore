@@ -20,71 +20,8 @@ namespace VCTR
          * Buffer_Subscriber is identical to FiFoBuffer but auto adds items to beginning of buffer.
          */
 
-        /**
-         * Subscribes to topic(s). Used by other subscribers to implement core functions.
-         * void receive(TYPE const& item, const Topic<TYPE>* topic) function must be implemented and will be called when receiving a published item.
-         */
-        template <typename TYPE>
-        class Subscriber_Generic : public Subscriber_Interface<TYPE>
-        {
-            friend Topic<TYPE>;
 
-        private:
-            // List of pointers to all subscribed topics.
-            ListArray<Topic<TYPE> *> subscribedTopics_;
-
-        public:
-            Subscriber_Generic() {}
-
-            Subscriber_Generic(Topic<TYPE> &topic)
-            {
-                subscribe(topic);
-            }
-
-            virtual ~Subscriber_Generic() {}
-
-            /**
-             * Will remove all subscriptions.
-             */
-            void unsubcribe() override
-            {
-                for (size_t i = 0; i < subscribedTopics_.size(); i++)
-                {
-                    subscribedTopics_[i]->removeSubscriber(*this);
-                }
-                subscribedTopics_.clear();
-            }
-
-            /**
-             * Will remove subscribtion. Will not receive anymore.
-             */
-            void unsubcribe(Topic<TYPE> &topic) override
-            {
-                topic.removeSubscriber(*this);
-                subscribedTopics_.removeAllEqual(&topic);
-            }
-
-            /**
-             * Subscribes to given topic. Will not remove old subscriptions.
-             * @param topic Topic to subscribe to.
-             */
-            void subscribe(Topic<TYPE> &topic) override
-            {
-                topic.addSubscriber(this);
-                subscribedTopics_.removeAllEqual(&topic);
-                subscribedTopics_.append(&topic);
-            }
-
-            /**
-             * Publishes an item to topic, but will not receive item. Makes it simpler to broadcast items from modules.
-             * @param item Item to publish
-             */
-            void publish(TYPE const &item)
-            {
-                for (size_t i = 0; i < subscribedTopics_.size(); i++)
-                    subscribedTopics_[i]->publish(item, this);
-            }
-        };
+        
 
         /**
          * This subscriber contains only one item that is updated on every publish.
@@ -92,7 +29,7 @@ namespace VCTR
          * Use isDataNew() to check if an item was updated.
          */
         template <typename TYPE>
-        class Simple_Subscriber : public Subscriber_Generic<TYPE>
+        class Simple_Subscriber : public Subscriber<TYPE>
         {
         private:
             bool itemIsNew = false;
@@ -111,7 +48,7 @@ namespace VCTR
             /**
              * @param topic Topic to subscribe to.
              */
-            Simple_Subscriber(Topic<TYPE> &topic) : Subscriber_Generic<TYPE>(topic) {}
+            Simple_Subscriber(Topic<TYPE> &topic) : Subscriber<TYPE>(topic) {}
 
             /**
              * @returns True if new data was received
@@ -133,7 +70,7 @@ namespace VCTR
          * This subscriber can only publish data to the subscribed topic. Is more optimised than others and allows safe connections.
          */
         template <typename TYPE>
-        class Topic_Publisher : public Subscriber_Generic<TYPE>
+        class Topic_Publisher : public Subscriber<TYPE>
         {
         private:
 
@@ -148,7 +85,7 @@ namespace VCTR
             /**
              * @param topic Topic to subscribe to.
              */
-            Topic_Publisher(Topic<TYPE> &topic) : Subscriber_Generic<TYPE>(topic) {}
+            Topic_Publisher(Topic<TYPE> &topic) : Subscriber<TYPE>(topic) {}
         };
 
         /**
@@ -157,7 +94,7 @@ namespace VCTR
          *
          */
         template <typename TYPE, size_t SIZE>
-        class Buffer_Subscriber : public Subscriber_Generic<TYPE>, public ListBuffer<TYPE, SIZE>
+        class Buffer_Subscriber : public Subscriber<TYPE>, public ListBuffer<TYPE, SIZE>
         {
         public:
             Buffer_Subscriber(bool overwrite = false) {}
@@ -166,7 +103,7 @@ namespace VCTR
              * @param topic Topic to subscribe to.
              * @param overwrite Set to true to overwrite oldest values if full. Defaults to false.
              */
-            Buffer_Subscriber(Topic<TYPE> &topic, bool overwrite = false) : Subscriber_Generic<TYPE>(topic)
+            Buffer_Subscriber(Topic<TYPE> &topic, bool overwrite = false) : Subscriber<TYPE>(topic)
             {
                 overwrite_ = overwrite;
             }
@@ -190,7 +127,7 @@ namespace VCTR
          * This subscriber calls the given function passing the data received form topic to it.
          */
         template <typename TYPE, typename CALLBACKTYPE>
-        class Callback_Subscriber : public Subscriber_Generic<TYPE>
+        class Callback_Subscriber : public Subscriber<TYPE>
         {
         public:
             Callback_Subscriber() {}
@@ -199,7 +136,7 @@ namespace VCTR
              * e.g. Callback_Subscriber<int, class> subscriber(intTopic);
              * @param topic Topic to subscribe to. But there is no object or object to call.
              */
-            Callback_Subscriber(Topic<TYPE> &topic) : Subscriber_Generic<TYPE>(topic)
+            Callback_Subscriber(Topic<TYPE> &topic) : Subscriber<TYPE>(topic)
             {
                 callbackFunc_ = nullptr;
                 object_ = nullptr;
@@ -211,7 +148,7 @@ namespace VCTR
              * @param objectPointer Which object to call the callback function on.
              * @param callbackFunc Function to call on data receive. Returns void and parameter is <TYPE>& item.
              */
-            Callback_Subscriber(Topic<TYPE> &topic, CALLBACKTYPE *objectPointer, void (CALLBACKTYPE::*callbackFunc)(const TYPE &)) : Subscriber_Generic<TYPE>(topic)
+            Callback_Subscriber(Topic<TYPE> &topic, CALLBACKTYPE *objectPointer, void (CALLBACKTYPE::*callbackFunc)(const TYPE &)) : Subscriber<TYPE>(topic)
             {
                 callbackFunc_ = callbackFunc;
                 object_ = objectPointer;
@@ -243,7 +180,7 @@ namespace VCTR
          * This subscriber calls the given function passing the data received form topic to it.
          */
         template <typename TYPE>
-        class StaticCallback_Subscriber : public Subscriber_Generic<TYPE>
+        class StaticCallback_Subscriber : public Subscriber<TYPE>
         {
         public:
             StaticCallback_Subscriber() {}
@@ -260,7 +197,7 @@ namespace VCTR
              * @param topic Topic to subscribe to.
              * @param callbackFunc Function to call on data receive.
              */
-            StaticCallback_Subscriber(Topic<TYPE> &topic, void (*callbackFunc)(TYPE const &item)) : Subscriber_Generic<TYPE>(topic)
+            StaticCallback_Subscriber(Topic<TYPE> &topic, void (*callbackFunc)(TYPE const &item)) : Subscriber<TYPE>(topic)
             {
                 callbackFunc_ = callbackFunc;
             }

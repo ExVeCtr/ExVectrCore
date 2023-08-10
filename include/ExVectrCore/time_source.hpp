@@ -21,7 +21,7 @@ namespace VCTR
          * This corrects the internal clock by either slowing it down or speeding up.
          * @note Using an external time correction can cause jumps in time output (Not negative) or inconsistant time (Pause or slow down)
          */
-        class Time_Source : public Subscriber_Generic<Timestamped<int64_t>>
+        class Time_Source : public Subscriber<Timestamped<int64_t>>
         {
         private:
 
