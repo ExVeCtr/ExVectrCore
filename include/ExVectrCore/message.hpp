@@ -10,7 +10,7 @@ namespace VCTR
     {
 
         /**
-         * @brief Messages are general information objects used to categorise and track data types like commands, telemetry etc. over non deterministic channels.
+         * @brief Messages are general information objects used to categorise and track data types like commands, telemetry etc. and store them directly for transfer.
          */
         class Message
         {
@@ -19,16 +19,17 @@ namespace VCTR
             /**
              * @brief Message types, could be commands, telemetry from different modules or devices. Values below 1000 are reserved for ExVectr.
              */
-            enum class Mes_Type
+            enum class Mes_Type : uint16_t
             {
-                Command = 0, /// General command.
-                Telemetry    /// General telemetry
+                Command = 0,    /// General command. To set a value, state etc.
+                Telemetry,      /// General telemetry. To share a value, state and other information. Also response to a request.
+                Request         /// Request for a value. To request a specific value, state etc.
             };
 
             /**
              * @brief Data types used by messages. Values below 1000 are reserved for ExVectr.
              */
-            enum class Data_Type
+            enum class Data_Type : uint16_t
             {
                 Integer = 0, /// Signed integer with 32 bits
                 Decimal,     /// A 32 bit floating point datatype, CUSTOM not castable to float/double.

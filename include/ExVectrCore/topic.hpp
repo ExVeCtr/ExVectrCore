@@ -13,9 +13,6 @@ namespace VCTR
     {
 
         template <typename TYPE>
-        class Topic;
-
-        template <typename TYPE>
         class Subscriber;
 
         template <typename TYPE>

@@ -8,7 +8,10 @@ namespace VCTR
 {
 
     namespace Core
-    {
+    {   
+
+        template <typename TYPE>
+        class EmptyList;
 
         /**
          * This is a abstract class for defining the interface for different list data types. Some examples are list array, list fixed.
@@ -18,8 +21,16 @@ namespace VCTR
         template <typename TYPE>
         class List
         {
+        private:
+
         public:
-            virtual ~List() {} // Virtual destructor. As needed due to inheretance of this class.
+            virtual ~List() {} // Virtual destructor. As needed due to expected inheretance of this class.
+
+            /**
+             * @brief Used for returning an empty list.
+             * @return an empty list reference object.
+             */
+            static const List<TYPE> &empty(); 
 
             /**
              * @brief Will return the size of the list. (Aka the length)
@@ -67,6 +78,57 @@ namespace VCTR
             template <typename TYPE2>
             List<TYPE> &operator=(const List<TYPE2> &listB);
         };
+
+        /**
+         * @brief A class used for signifying an empty list. 
+         * @note Access operators will always return the same object.
+         * @tparam TYPE 
+         */
+        template<typename TYPE>
+        class EmptyList : public List<TYPE>
+        {
+        private:
+
+            TYPE type_;
+
+        public: 
+
+            size_t size() const override
+                { return 0; } 
+
+            TYPE &operator[](size_t index) override 
+            {
+                return type_;
+            }
+
+            const TYPE &operator[](size_t index) const override
+            {
+                return type_;
+            }
+
+            TYPE &operator()(int32_t index) override
+            {
+                return type_;
+            }
+
+            const TYPE &operator()(int32_t index) const override
+            {
+                return type_;
+            }
+
+            List<TYPE> &operator=(const List<TYPE> &listB) override
+            {
+                return *this;
+            }
+
+        };
+
+        template <typename TYPE>
+        const List<TYPE> &List<TYPE>::empty() 
+        {
+            static EmptyList<TYPE> emptyList;
+            return emptyList;
+        }
 
         template <typename TYPE>
         TYPE &List<TYPE>::operator()(int32_t index)
