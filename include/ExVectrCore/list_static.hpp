@@ -1,5 +1,5 @@
-#ifndef EXVECTRCORE_ListStatic_H
-#define EXVECTRCORE_ListStatic_H
+#ifndef EXVECTRCORE_LISTSTATIC_H
+#define EXVECTRCORE_LISTSTATIC_H
 
 #include "stdint.h"
 #include "stddef.h"
@@ -34,25 +34,18 @@ namespace VCTR
             ~ListStatic(); // Remember to remove itsself from linked list
 
             /**
-             * @note Expensive operation. O(n) time complexity.
+             * @note 
              * @returns number of elements in list.
              */
             size_t size() const override;
 
             /**
-             * @brief Splits the list at given index.
-             * @param index Index to split list at.
-             * @return Beginning of list split off this list.
-             */
-            // ListStatic* split(size_t index);
-
-            /**
-             * @returns item at given index after this ListStatic.
+             * @returns item at given index.
              */
             T &operator[](size_t index) override;
 
             /**
-             * @returns item at given index after this ListStatic.
+             * @returns item at given index.
              */
             const T &operator[](size_t index) const override;
 
