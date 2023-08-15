@@ -215,7 +215,7 @@ namespace VCTR
             
             if (subbedTopic_->subListStart_ == &subListElement_) //We are start of list. Set topic list begin to next element. If we are last then this will be nullptr.
             {
-                subbedTopic_->subListStart_ == subListElement_.getNext();
+                subbedTopic_->subListStart_ = subListElement_.getNext();
                 subbedTopic_ = nullptr;
                 return;
             }
