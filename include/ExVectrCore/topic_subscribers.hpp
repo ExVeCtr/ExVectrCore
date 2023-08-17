@@ -46,7 +46,7 @@ namespace VCTR
             /**
              * Will remove all subscriptions.
              */
-            void unsubcribe() override
+            void unsubscribe() override
             {
                 for (size_t i = 0; i < subscribedTopics_.size(); i++)
                 {
@@ -58,7 +58,7 @@ namespace VCTR
             /**
              * Will remove subscribtion. Will not receive anymore.
              */
-            void unsubcribe(Topic<TYPE> &topic) override
+            void unsubscribe(Topic<TYPE> &topic) override
             {
                 topic.removeSubscriber(*this);
                 subscribedTopics_.removeAllEqual(&topic);

@@ -54,12 +54,12 @@ namespace VCTR
             /**
              * Will remove all subscribtions. Will not receive anymore data.
              */
-            virtual void unsubcribe() = 0;
+            virtual void unsubscribe() = 0;
 
             /**
              * Will remove only given topic. Will not receive anymore data from this topic.
              */
-            virtual void unsubcribe(Topic<TYPE> &topic) = 0;
+            virtual void unsubscribe(Topic<TYPE> &topic) = 0;
 
             /**
              * Subscribes to given topic. Will remove old subscription.
@@ -152,7 +152,7 @@ namespace VCTR
         Topic<TYPE>::~Topic()
         {
             for (size_t i = 0; i < subscribers_.size(); i++)
-                subscribers_[i]->unsubcribe(*this);
+                subscribers_[i]->unsubscribe(*this);
         }
 
         template <typename TYPE>
