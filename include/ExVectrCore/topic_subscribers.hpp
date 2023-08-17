@@ -48,7 +48,7 @@ namespace VCTR
             /**
              * @param topic Topic to subscribe to.
              */
-            Simple_Subscriber(Topic<TYPE> &topic) : Subscriber<TYPE>(topic) {}
+            Simple_Subscriber(Topic<TYPE> &topic) {subscribe(topic);}
 
             /**
              * @returns True if new data was received
@@ -85,7 +85,7 @@ namespace VCTR
             /**
              * @param topic Topic to subscribe to.
              */
-            Topic_Publisher(Topic<TYPE> &topic) : Subscriber<TYPE>(topic) {}
+            Topic_Publisher(Topic<TYPE> &topic) {subscribe(topic);}
         };
 
         /**
@@ -103,8 +103,9 @@ namespace VCTR
              * @param topic Topic to subscribe to.
              * @param overwrite Set to true to overwrite oldest values if full. Defaults to false.
              */
-            Buffer_Subscriber(Topic<TYPE> &topic, bool overwrite = false) : Subscriber<TYPE>(topic)
+            Buffer_Subscriber(Topic<TYPE> &topic, bool overwrite = false)
             {
+                subscribe(topic);
                 overwrite_ = overwrite;
             }
 
@@ -136,8 +137,9 @@ namespace VCTR
              * e.g. Callback_Subscriber<int, class> subscriber(intTopic);
              * @param topic Topic to subscribe to. But there is no object or object to call.
              */
-            Callback_Subscriber(Topic<TYPE> &topic) : Subscriber<TYPE>(topic)
+            Callback_Subscriber(Topic<TYPE> &topic)
             {
+                subscribe(topic);
                 callbackFunc_ = nullptr;
                 object_ = nullptr;
             }
@@ -148,8 +150,9 @@ namespace VCTR
              * @param objectPointer Which object to call the callback function on.
              * @param callbackFunc Function to call on data receive. Returns void and parameter is <TYPE>& item.
              */
-            Callback_Subscriber(Topic<TYPE> &topic, CALLBACKTYPE *objectPointer, void (CALLBACKTYPE::*callbackFunc)(const TYPE &)) : Subscriber<TYPE>(topic)
+            Callback_Subscriber(Topic<TYPE> &topic, CALLBACKTYPE *objectPointer, void (CALLBACKTYPE::*callbackFunc)(const TYPE &))
             {
+                subscribe(topic);
                 callbackFunc_ = callbackFunc;
                 object_ = objectPointer;
             }
@@ -197,8 +200,9 @@ namespace VCTR
              * @param topic Topic to subscribe to.
              * @param callbackFunc Function to call on data receive.
              */
-            StaticCallback_Subscriber(Topic<TYPE> &topic, void (*callbackFunc)(TYPE const &item)) : Subscriber<TYPE>(topic)
+            StaticCallback_Subscriber(Topic<TYPE> &topic, void (*callbackFunc)(TYPE const &item))
             {
+                subscribe(topic);
                 callbackFunc_ = callbackFunc;
             }
 

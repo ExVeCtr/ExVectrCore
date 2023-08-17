@@ -43,8 +43,6 @@ namespace VCTR
             int64_t offset_ = 0;
             /// @brief Will skip missed timings.
             bool skipOverdueRun_ = true;
-            /// @brief Name of task
-            char taskName_[50];
 
         public:
             /**
@@ -65,11 +63,6 @@ namespace VCTR
              * Does what is says. Returns the task interval in nanoseconds.
             */
             int64_t getInterval();
-
-            /**
-             * @returns a char array for the name of the task.
-             */
-            const char *taskName() override final;
 
             /**
              * Called by scheduler to allow task to do its thing. In this task type, the task plans the next run.

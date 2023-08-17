@@ -56,6 +56,8 @@ namespace VCTR
                 size_t taskPriority_ = 0;
                 ///@brief Scheduler calling this task.
                 Scheduler *scheduler_ = nullptr;
+                /// @brief Name of task. Max 49 characters
+                char taskName_[50];
 
             private:
                 /// @brief Use by scheduler to iterate through all attached tasks.
@@ -64,20 +66,19 @@ namespace VCTR
                 size_t runCounter = 0;
                 /// @brief time in ns of the last reset.
                 int64_t counterResetTimestamp = 0;
-                /// @brief Pointer to the task.
-                Task *task = nullptr;
                 /// @brief The pseudo priority of the task. Contains priority of timing, misses, and timeslot length.
                 int32_t pseudoPriority = 0;
                 /// @brief The number of times the task was not called past its release time.
                 int32_t misses = 0; // The number of time the task could have ran but did not. Increments priority with every miss. Is reset when task is ran.
 
             public:
-                virtual ~Task();
 
                 /**
-                 * @returns a char array for the name of the task.
+                 * @brief Task ctor.
                  */
-                virtual const char *taskName() = 0;
+                Task();
+
+                virtual ~Task();
 
                 /**
                  * Will be called by scheduler ASAP if isInitialised() returns false.
@@ -99,6 +100,11 @@ namespace VCTR
                  * Scheduler will call this to allow the task to check if and when the task should run.
                  */
                 virtual void taskCheck();
+
+                /**
+                 * @returns a char array for the name of the task.
+                 */
+                const char *getTaskName() const;
 
                 /**
                  * Latest time the task can be called.
