@@ -110,10 +110,11 @@ void VCTR::Core::Scheduler::tick()
      * - Increment the misses counter for all tasks that should run. (The selected task to run is will be set to 0, once it has run.)
      */
     auto task = tasks_;
-    auto highestPriority = VCTR::Core::END_OF_TIME;
+    auto highestPriority = 0;
     VCTR::Core::ListLinked<VCTR::Core::Scheduler::Task *>* highestPriorityTask = nullptr;
     while (task != nullptr) 
     {
+
         (*task)[0]->taskCheck();
         (*task)[0]->pseudoPriority = getTaskPseudoPriority(*(*task)[0]);
         
@@ -129,34 +130,35 @@ void VCTR::Core::Scheduler::tick()
         }
 
         task = task->getNext();
+        
     }
 
     if (highestPriorityTask != nullptr)
     {
 
-        auto task = (*highestPriorityTask)[0];
+        auto taskRun = (*highestPriorityTask)[0];
 
-        task->misses = 0;
-        task->runCounter++;
+        taskRun->misses = 0;
+        taskRun->runCounter++;
 
-        if (!task->task->getInitialised())
+        if (!taskRun->getInitialised())
         {
-            task->task->setInitialised(true); // Before init so the task can override this when initialising.
-            task->task->taskInit();
+            taskRun->setInitialised(true); // Before init so the task can override this when initialising.
+            taskRun->taskInit();
         }
 
         int64_t taskStart = Core::NOW();
-        task->task->taskRun();
+        taskRun->taskRun();
         int64_t taskLength = Core::NOW() - taskStart;
-        task->task->taskRuntime_ = task->task->taskRuntime_ * 0.98 + taskLength * 0.02;
+        taskRun->taskRuntime_ = taskRun->taskRuntime_ * 0.98 + taskLength * 0.02;
 
-        if (Core::NOW() - task->counterResetTimestamp >= 5 * Core::SECONDS)
+        if (Core::NOW() - taskRun->counterResetTimestamp >= 5 * Core::SECONDS)
         {
-            float dTime = float(Core::NOW() - task->counterResetTimestamp) / Core::SECONDS;
+            float dTime = float(Core::NOW() - taskRun->counterResetTimestamp) / Core::SECONDS;
 
-            task->task->taskRate_ = float(task->runCounter) / dTime;
-            task->counterResetTimestamp = Core::NOW();
-            task->runCounter = 0;
+            taskRun->taskRate_ = float(taskRun->runCounter) / dTime;
+            taskRun->counterResetTimestamp = Core::NOW();
+            taskRun->runCounter = 0;
         }
         
     }
@@ -168,6 +170,12 @@ void VCTR::Core::Scheduler::tick()
 }
 
 // Scheduler::Taskabstract functions
+
+VCTR::Core::Scheduler::Task::Task()
+{
+    taskListElement_[0] = this;
+    taskName_[0] = '\0';
+}
 
 VCTR::Core::Scheduler::Task::~Task()
 {
@@ -181,6 +189,11 @@ void VCTR::Core::Scheduler::Task::taskRun()
 }
 
 void VCTR::Core::Scheduler::Task::taskCheck() {}
+
+const char* VCTR::Core::Scheduler::Task::getTaskName() const
+{
+    return taskName_;
+}
 
 int64_t VCTR::Core::Scheduler::Task::getDeadline() const
 {
