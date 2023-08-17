@@ -78,7 +78,7 @@ namespace VCTR
              * @param listElement ListLinked to insert.
              * @param index Index to append listElement at.
              */
-            void insert(ListLinked &listElement, size_t index);
+            void insert(size_t index, ListLinked &listElement);
 
             /**
              * @brief Appends ListLinked to end of list.
@@ -203,14 +203,14 @@ namespace VCTR
         }
 
         template <typename T>
-        void ListLinked<T>::insert(ListLinked &listElement, size_t index)
+        void ListLinked<T>::insert(size_t index, ListLinked &listElement)
         {
 
             listElement.remove(); // Remove from old list
 
             ListLinked *next = this;
             ListLinked *prev = prev_;
-            for (size_t i = 0; i < index && next_ != nullptr; i++)
+            for (size_t i = 0; i < index && next != nullptr; i++)
             {
 
                 prev = next;
@@ -239,7 +239,7 @@ namespace VCTR
 
             ListLinked *next = next_;
             ListLinked *prev = this;
-            while (next_ != nullptr && next_ != this)
+            while (next != nullptr && next != this)
             {
 
                 prev = next;
@@ -258,7 +258,7 @@ namespace VCTR
 
             ListLinked *next = this;
             ListLinked *prev = prev_;
-            for (size_t i = 0; i < index && next_->next_ != nullptr; i++)
+            for (size_t i = 0; i < index && next->next_ != nullptr; i++)
             {
 
                 prev = next;
@@ -284,7 +284,7 @@ namespace VCTR
         {
 
             ListLinked *next = this;
-            for (size_t i = 0; i < index && next_->next_ != nullptr; i++)
+            for (size_t i = 0; i < index && next->next_ != nullptr; i++)
             {
                 next = next->next_;
             }
@@ -297,7 +297,7 @@ namespace VCTR
         {
 
             const ListLinked *next = this;
-            for (size_t i = 0; i < index && next_->next_ != nullptr; i++)
+            for (size_t i = 0; i < index && next->next_ != nullptr; i++)
             {
                 next = next->next_;
             }
