@@ -135,7 +135,7 @@ namespace VCTR
         {
             auto len = size();
             if (index < 0)
-                index = len + index;
+                index = int32_t(len) + index;
 
             return (*this)[index % len];
         }
