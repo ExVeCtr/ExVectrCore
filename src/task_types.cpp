@@ -30,11 +30,6 @@ int64_t VCTR::Core::Task_Periodic::getInterval() {
     return interval_ns_;
 }
 
-const char *VCTR::Core::Task_Periodic::taskName()
-{
-    return taskName_;
-}
-
 void VCTR::Core::Task_Periodic::taskRun()
 {
     if (skipOverdueRun_)

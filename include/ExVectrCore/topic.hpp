@@ -148,14 +148,17 @@ namespace VCTR
         {
 
             ListLinked<Subscriber<TYPE> *> *next = subListStart_;
-            while (next != nullptr && next != subListStart_)
-            {
+            if (subListStart_ == nullptr)
+                return;
+
+            do { // Welcome to this coding tour. Here we can see a very rare do while loop in a place it makes sense.
 
                 if ((*next)[0]->receiveItems_)
                 {
                     (*next)[0]->receive(item, this);
                 }
-            }
+                next = next->getNext();
+            } while (next != nullptr && next != subListStart_);
         }
 
         template <typename TYPE>
@@ -163,14 +166,17 @@ namespace VCTR
         {
 
             ListLinked<Subscriber<TYPE> *> *next = subListStart_;
-            while (next != nullptr && next != subListStart_)
-            {
+            if (subListStart_ == nullptr)
+                return;
 
-                if ((*next)[0]->receiveItems_ && (*next)[0] != subscriber)
+            do { // Welcome to this coding tour. Here we can see a very rare do while loop in a place it makes sense.
+
+                if ((*next)[0]->receiveItems_)
                 {
                     (*next)[0]->receive(item, this);
                 }
-            }
+                next = next->getNext();
+            } while (next != nullptr && next != subListStart_);
         }
 
         template <typename TYPE>
