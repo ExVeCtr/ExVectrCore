@@ -20,9 +20,6 @@ namespace VCTR
          * Buffer_Subscriber is identical to FiFoBuffer but auto adds items to beginning of buffer.
          */
 
-
-        
-
         /**
          * This subscriber contains only one item that is updated on every publish.
          * @see Buffer_Subscriber for receiving more them one item.
@@ -48,7 +45,7 @@ namespace VCTR
             /**
              * @param topic Topic to subscribe to.
              */
-            Simple_Subscriber(Topic<TYPE> &topic) {subscribe(topic);}
+            Simple_Subscriber(Topic<TYPE> &topic) { subscribe(topic); }
 
             /**
              * @returns True if new data was received
@@ -63,7 +60,6 @@ namespace VCTR
                 itemIsNew = false;
                 return receivedItem;
             }
-
         };
 
         /**
@@ -73,7 +69,6 @@ namespace VCTR
         class Topic_Publisher : public Subscriber<TYPE>
         {
         private:
-
             void receive(TYPE const &item, const Topic<TYPE> *topic) override
             {
                 // Do nothing
@@ -85,7 +80,7 @@ namespace VCTR
             /**
              * @param topic Topic to subscribe to.
              */
-            Topic_Publisher(Topic<TYPE> &topic) {subscribe(topic);}
+            Topic_Publisher(Topic<TYPE> &topic) { subscribe(topic); }
         };
 
         /**
