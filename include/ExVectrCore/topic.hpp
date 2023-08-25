@@ -36,6 +36,11 @@ namespace VCTR
             const List<Subscriber<TYPE> *> &getSubscriberList() const;
 
             /**
+             * @brief Will unsubscribe all subscribers.
+             */
+            void unsubscribeAll();
+
+            /**
              * Sends item to all subscribers.
              * @param item Item to be sent.
              */
@@ -123,14 +128,7 @@ namespace VCTR
         template <typename TYPE>
         Topic<TYPE>::~Topic()
         {
-
-            ListLinked<Subscriber<TYPE> *> *next = subListStart_;
-            while (next != nullptr && next != subListStart_)
-            {
-
-                (*next)[0]->unsubscribe();
-                next = next->getNext();
-            }
+            unsubscribeAll();
         }
 
         template <typename TYPE>
@@ -141,6 +139,23 @@ namespace VCTR
                 return ListStatic<Subscriber<TYPE> *, 0>();
             }
             return *subListStart_;
+        }
+
+        template <typename TYPE>
+        void Topic<TYPE>::unsubscribeAll()
+        {
+            
+            if (subListStart_ == nullptr)
+                return;
+
+            ListLinked<Subscriber<TYPE> *> *item = subListStart_->getEnd();
+            while (item != nullptr && item != subListStart_)
+            {
+
+                (*item)[0]->unsubscribe();
+                item = item->getPrev();
+            }
+
         }
 
         template <typename TYPE>
