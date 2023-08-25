@@ -38,6 +38,11 @@ namespace VCTR
              * @returns number of elements in list.
              */
             size_t size() const override;
+            
+            /**
+             * @returns pointer to first element in list.
+             */
+            const T* getPtr() const;
 
             /**
              * @returns item at given index.
@@ -63,6 +68,12 @@ namespace VCTR
         template <typename T, size_t L>
         ListStatic<T, L>::~ListStatic()
         {}
+
+        template <typename T, size_t L>
+        const T* ListStatic<T, L>::getPtr() const
+        {
+            return items_;
+        }
 
         template <typename T, size_t L>
         size_t ListStatic<T, L>::size() const
