@@ -37,6 +37,16 @@ namespace VCTR
 
             ~ListBuffer() {} // Remember to delete data on destruction
 
+            size_t getFront() const
+            {
+                return front_;
+            }
+
+            size_t getBack() const
+            {
+                return back_;
+            }
+
             /**
              * @returns number of elements in ListBuffer
              */
@@ -57,15 +67,6 @@ namespace VCTR
             bool placeFront(const T &element, bool overwrite = false);
 
             /**
-             * Places a new element to the front of the ListBuffer. AKA stack push.
-             *
-             * @param element element to be placed into ListBuffer.
-             * @param overwrite Overwrites elements at back if true. Default false.
-             * @return true if placed into ListBuffer.
-             */
-            bool placeFront(const T &&element, bool overwrite = false);
-
-            /**
              * Places a new element to the back of the ListBuffer. AKA enqueue item.
              *
              * @param element element to be placed into ListBuffer.
@@ -73,15 +74,6 @@ namespace VCTR
              * @return true if placed into ListBuffer.
              */
             bool placeBack(const T &element, bool overwrite = false);
-
-            /**
-             * Places a new element to the back of the ListBuffer. AKA enqueue item.
-             *
-             * @param element element to be placed into ListBuffer.
-             * @param overwrite Overwrites elements at front if true. Default false.
-             * @return true if placed into ListBuffer.
-             */
-            bool placeBack(const T &&element, bool overwrite = false);
 
             /**
              * Takes a element from the front of the ListBuffer and places it into element. AKA dequeue item.
@@ -380,7 +372,9 @@ namespace VCTR
         template <typename T, size_t SIZE>
         void ListBuffer<T, SIZE>::clear()
         {
-            front_ = back_ = numElements_ = 0;
+            front_ = 0;
+            back_ = 0;
+            numElements_ = 0;
         }
 
         template <typename T, size_t SIZE>
@@ -556,11 +550,11 @@ namespace VCTR
         void ListBuffer<T, SIZE>::removeFront(size_t num)
         {
 
-            if (numElements_ < num)
+            if (numElements_ < num) // If we want to remove more than we have then remove all.
                 num = numElements_;
 
-            if (num > front_)
-                front_ = SIZE - num;
+            if (front_ < num)
+                front_ = SIZE + front_ - num;
             else
                 front_ -= num;
 
@@ -604,53 +598,7 @@ namespace VCTR
         }
 
         template <typename T, size_t SIZE>
-        bool ListBuffer<T, SIZE>::placeFront(const T &&element, bool overwrite)
-        {
-
-            if (numElements_ == SIZE)
-            {
-
-                if (overwrite)
-                    removeBack();
-                else
-                    return false;
-            }
-
-            listBufferArray_[front_] = element;
-
-            front_ = (front_ + 1) % SIZE;
-            numElements_++;
-
-            return true;
-        }
-
-        template <typename T, size_t SIZE>
         bool ListBuffer<T, SIZE>::placeBack(const T &element, bool overwrite)
-        {
-
-            if (numElements_ == SIZE)
-            {
-
-                if (overwrite)
-                    removeFront();
-                else
-                    return false;
-            }
-
-            if (back_ == 0)
-                back_ = SIZE - 1;
-            else
-                back_--;
-
-            listBufferArray_[back_] = element;
-
-            numElements_++;
-
-            return true;
-        }
-
-        template <typename T, size_t SIZE>
-        bool ListBuffer<T, SIZE>::placeBack(const T &&element, bool overwrite)
         {
 
             if (numElements_ == SIZE)
