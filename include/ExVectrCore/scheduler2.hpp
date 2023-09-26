@@ -53,7 +53,7 @@ namespace VCTR
                 /// @brief earliest time the scheduler should call run()
                 int64_t taskRelease_ = 0;
                 /// @brief what the task priority is. Higher priorities are more likely to meet target timings for run().
-                size_t taskPriority_ = 0;
+                uint16_t taskPriority_ = 100;
                 ///@brief Scheduler calling this task.
                 Scheduler *scheduler_ = nullptr;
                 /// @brief Name of task. Max 49 characters
@@ -129,12 +129,12 @@ namespace VCTR
                 /**
                  * Priority of the task. Higher is more likely to hit timing targets.
                  */
-                size_t getPriority() const;
+                uint16_t getPriority() const;
 
                 /**
                  * Priority of the task. Higher is more likely to hit timing targets.
                  */
-                void setPriority(size_t priority);
+                void setPriority(uint16_t priority);
 
                 /**
                  * init() will be called by scheduler if this returns false.

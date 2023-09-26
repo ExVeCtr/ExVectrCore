@@ -70,12 +70,30 @@ bool VCTR::Core::Scheduler::removeTask(Scheduler::Task &task)
 int32_t VCTR::Core::Scheduler::getTaskPseudoPriority(const VCTR::Core::Scheduler::Task &task)
 {
 
-    uint64_t den = task.taskRuntime_ + task.getDeadline() - task.getRelease();
+    //Calculate the pseudo priority of the task using the following criteria:
+    // - Tighter scheduling between release and deadline results in higher priority.
+    // - Higher priority results in higher priority.
+    // - More misses results in higher priority.
+    // - Higher runtime results in lower priority.
+    // - Closer to the deadline results in higher priority.
 
-    if (den == 0)
-        den = 1;
+    // Currently only using the first and third criteria.
 
-    return static_cast<int32_t>((NOW() - task.getRelease() + (task.getPriority() + task.misses) * VCTR::Core::MICROSECONDS) / den);
+    size_t criteria1 = SIZE_MAX / (task.getDeadline() - task.getRelease() + 1);
+    size_t criteria2 = task.getPriority();
+    size_t criteria3 = task.misses;
+    size_t criteria4 = task.taskRuntime_;
+
+    size_t criteria5 = 0;
+    /*if (NOW() > task.getDeadline())
+        return INT32_MAX;*/
+
+    auto pseudoPriority = criteria1 + criteria3*10;
+    if (pseudoPriority > INT32_MAX)
+        pseudoPriority = INT32_MAX;
+
+    return pseudoPriority;
+    
 }
 
 int64_t VCTR::Core::Scheduler::getNextTaskRelease() const
@@ -105,9 +123,9 @@ void VCTR::Core::Scheduler::tick()
     /**
      * - Iterate through the list of tasks
      * - Let each task update their state
-     * - Update their pseudo priority
-     * - Find the task with the highest pseudo priority that should run.
+     * - Update their pseudo priority and find the task with the highest pseudo priority that should run.
      * - Increment the misses counter for all tasks that should run. (The selected task to run is will be set to 0, once it has run.)
+     * - Run the task with the highest pseudo priority.
      */
     auto task = tasks_;
     auto highestPriority = 0;
@@ -219,12 +237,12 @@ void VCTR::Core::Scheduler::Task::setRelease(int64_t release)
         taskDeadline_ = taskRelease_;
 }
 
-size_t VCTR::Core::Scheduler::Task::getPriority() const
+uint16_t VCTR::Core::Scheduler::Task::getPriority() const
 {
     return taskPriority_;
 }
 
-void VCTR::Core::Scheduler::Task::setPriority(size_t priority)
+void VCTR::Core::Scheduler::Task::setPriority(uint16_t priority)
 {
     taskPriority_ = priority;
 }
