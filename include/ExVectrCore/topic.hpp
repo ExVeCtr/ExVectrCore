@@ -184,9 +184,9 @@ namespace VCTR
             if (subListStart_ == nullptr)
                 return;
 
-            do { // Welcome to this coding tour. Here we can see a very rare do while loop in a place it makes sense.
+            do { // Welcome to this code tour. Here we can see a very rare do while loop in a place it makes sense.
 
-                if ((*next)[0]->receiveItems_)
+                if ((*next)[0]->receiveItems_ && (*next)[0] != subscriber)
                 {
                     (*next)[0]->receive(item, this);
                 }
