@@ -54,8 +54,6 @@ namespace VCTR
                 int64_t taskRelease_ = 0;
                 /// @brief what the task priority is. Higher priorities are more likely to meet target timings for run().
                 uint16_t taskPriority_ = 100;
-                ///@brief Scheduler calling this task.
-                Scheduler *scheduler_ = nullptr;
                 /// @brief Name of task. Max 49 characters
                 char taskName_[50];
 
@@ -70,6 +68,8 @@ namespace VCTR
                 int32_t pseudoPriority = 0;
                 /// @brief The number of times the task was not called past its release time.
                 int32_t misses = 0; // The number of time the task could have ran but did not. Increments priority with every miss. Is reset when task is ran.
+                ///@brief Scheduler calling this task.
+                Scheduler *scheduler_ = nullptr;
 
             public:
 
@@ -83,7 +83,7 @@ namespace VCTR
                 /**
                  * Will be called by scheduler ASAP if isInitialised() returns false.
                  */
-                virtual void taskInit() = 0;
+                virtual void taskInit();
 
                 /**
                  * To be implemented by application tasks. Will be called by run().
@@ -165,6 +165,17 @@ namespace VCTR
                  * @returns the average time the task takes to run in ns.
                  */
                 int64_t getRuntime() const;
+
+                /**
+                 * @returns the scheduler calling this task. nullptr if not attached to a scheduler.
+                 */
+                Scheduler const* getScheduler() const;
+
+                /**
+                 * @brief removes this task from the scheduler.
+                 */
+                void removeFromScheduler();
+
             };
 
         private:

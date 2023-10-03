@@ -42,6 +42,8 @@ bool VCTR::Core::Scheduler::addTask(Scheduler::Task &task)
     else
         tasks_->append(task.taskListElement_);
 
+    task.scheduler_ = this;
+
     return true;
 }
 
@@ -59,6 +61,7 @@ bool VCTR::Core::Scheduler::removeTask(Scheduler::Task &task)
                 tasks_ = list->getNext();
 
             list->remove();
+            task.scheduler_ = nullptr;
             return true;
         }
         list = list->getNext();
@@ -70,12 +73,12 @@ bool VCTR::Core::Scheduler::removeTask(Scheduler::Task &task)
 int32_t VCTR::Core::Scheduler::getTaskPseudoPriority(const VCTR::Core::Scheduler::Task &task)
 {
 
-    //Calculate the pseudo priority of the task using the following criteria:
-    // - Tighter scheduling between release and deadline results in higher priority.
-    // - Higher priority results in higher priority.
-    // - More misses results in higher priority.
-    // - Higher runtime results in lower priority.
-    // - Closer to the deadline results in higher priority.
+    // Calculate the pseudo priority of the task using the following criteria:
+    //  - Tighter scheduling between release and deadline results in higher priority.
+    //  - Higher priority results in higher priority.
+    //  - More misses results in higher priority.
+    //  - Higher runtime results in lower priority.
+    //  - Closer to the deadline results in higher priority.
 
     // Currently only using the first and third criteria.
 
@@ -88,12 +91,11 @@ int32_t VCTR::Core::Scheduler::getTaskPseudoPriority(const VCTR::Core::Scheduler
     /*if (NOW() > task.getDeadline())
         return INT32_MAX;*/
 
-    auto pseudoPriority = criteria1 + criteria3*10;
+    auto pseudoPriority = criteria1 + criteria3 * 10;
     if (pseudoPriority > INT32_MAX)
         pseudoPriority = INT32_MAX;
 
     return pseudoPriority;
-    
 }
 
 int64_t VCTR::Core::Scheduler::getNextTaskRelease() const
@@ -129,13 +131,13 @@ void VCTR::Core::Scheduler::tick()
      */
     auto task = tasks_;
     auto highestPriority = 0;
-    VCTR::Core::ListLinked<VCTR::Core::Scheduler::Task *>* highestPriorityTask = nullptr;
-    while (task != nullptr) 
+    VCTR::Core::ListLinked<VCTR::Core::Scheduler::Task *> *highestPriorityTask = nullptr;
+    while (task != nullptr)
     {
 
         (*task)[0]->taskCheck();
         (*task)[0]->pseudoPriority = getTaskPseudoPriority(*(*task)[0]);
-        
+
         if (NOW() > (*task)[0]->getRelease())
         {
             (*task)[0]->misses++;
@@ -148,7 +150,6 @@ void VCTR::Core::Scheduler::tick()
         }
 
         task = task->getNext();
-        
     }
 
     if (highestPriorityTask != nullptr)
@@ -178,13 +179,11 @@ void VCTR::Core::Scheduler::tick()
             taskRun->counterResetTimestamp = Core::NOW();
             taskRun->runCounter = 0;
         }
-        
     }
 
     /*for (size_t i = 0; i < taskIndexRun_.size(); i++) {
         Core::printM("Taskrun %d, %d\n", taskIndexRun_[i], tasks_[taskIndexRun_[i]].pseudoPriority);
     }*/
-
 }
 
 // Scheduler::Taskabstract functions
@@ -201,6 +200,10 @@ VCTR::Core::Scheduler::Task::~Task()
         scheduler_->removeTask(*this);
 }
 
+void VCTR::Core::Scheduler::Task::taskInit()
+{
+}
+
 void VCTR::Core::Scheduler::Task::taskRun()
 {
     taskThread();
@@ -208,7 +211,7 @@ void VCTR::Core::Scheduler::Task::taskRun()
 
 void VCTR::Core::Scheduler::Task::taskCheck() {}
 
-const char* VCTR::Core::Scheduler::Task::getTaskName() const
+const char *VCTR::Core::Scheduler::Task::getTaskName() const
 {
     return taskName_;
 }
@@ -275,4 +278,15 @@ float VCTR::Core::Scheduler::Task::getRate() const
 int64_t VCTR::Core::Scheduler::Task::getRuntime() const
 {
     return taskRuntime_;
+}
+
+VCTR::Core::Scheduler const *VCTR::Core::Scheduler::Task::getScheduler() const
+{
+    return scheduler_;
+}
+
+void VCTR::Core::Scheduler::Task::removeFromScheduler()
+{
+    if (scheduler_ != nullptr)
+        scheduler_->removeTask(*this);
 }
