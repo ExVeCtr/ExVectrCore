@@ -104,9 +104,9 @@ int64_t VCTR::Core::Scheduler::getNextTaskRelease() const
     if (tasks_ == nullptr)
         return VCTR::Core::END_OF_TIME;
 
-    int64_t earliest = VCTR::Core::END_OF_TIME;
-    auto task = tasks_;
-    while (task != nullptr)
+    int64_t earliest = (*tasks_)[0]->getRelease();
+    auto task = tasks_->getNext();
+    while (task != nullptr && task != tasks_)
     {
         if ((*task)[0]->getRelease() < earliest)
             earliest = (*task)[0]->getRelease();
@@ -138,7 +138,7 @@ void VCTR::Core::Scheduler::tick()
         (*task)[0]->taskCheck();
         (*task)[0]->pseudoPriority = getTaskPseudoPriority(*(*task)[0]);
 
-        if (NOW() > (*task)[0]->getRelease())
+        if (!(*task)[0]->getPaused() && NOW() > (*task)[0]->getRelease())
         {
             (*task)[0]->misses++;
 
@@ -166,18 +166,22 @@ void VCTR::Core::Scheduler::tick()
             taskRun->taskInit();
         }
 
-        int64_t taskStart = Core::NOW();
-        taskRun->taskRun();
-        int64_t taskLength = Core::NOW() - taskStart;
-        taskRun->taskRuntime_ = taskRun->taskRuntime_ * 0.98 + taskLength * 0.02;
+        if (taskRun->getInitialised()) { //Check again, as initialisation might have failed.
 
-        if (Core::NOW() - taskRun->counterResetTimestamp >= 5 * Core::SECONDS)
-        {
-            float dTime = float(Core::NOW() - taskRun->counterResetTimestamp) / Core::SECONDS;
+            int64_t taskStart = Core::NOW();
+            taskRun->taskRun();
+            int64_t taskLength = Core::NOW() - taskStart;
+            taskRun->taskRuntime_ = taskRun->taskRuntime_ * 0.98 + taskLength * 0.02;
 
-            taskRun->taskRate_ = float(taskRun->runCounter) / dTime;
-            taskRun->counterResetTimestamp = Core::NOW();
-            taskRun->runCounter = 0;
+            if (Core::NOW() - taskRun->counterResetTimestamp >= 5 * Core::SECONDS)
+            {
+                float dTime = float(Core::NOW() - taskRun->counterResetTimestamp) / Core::SECONDS;
+
+                taskRun->taskRate_ = float(taskRun->runCounter) / dTime;
+                taskRun->counterResetTimestamp = Core::NOW();
+                taskRun->runCounter = 0;
+            }
+
         }
     }
 
