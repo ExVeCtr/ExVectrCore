@@ -53,25 +53,25 @@ namespace VCTR
              * @note Expensive operation. O(n) time complexity and will return the object it is called on if list is circular.
              * @returns the start of the list.
              */
-            ListLinked *getBegin() const;
+            ListLinked *getBegin();
 
             /**
              * @note Expensive operation. O(n) time complexity and will return the object it is called on if list is circular.
              * @returns the end of the list.
              */
-            ListLinked *getEnd() const;
+            ListLinked *getEnd();
 
             /**
              * @note Cheap operation. O(1) time complexity.
              * @returns the start of the list. Nullptr if at end of list.
              */
-            ListLinked *getNext() const;
+            ListLinked *getNext();
 
             /**
              * @note Cheap operation. O(1) time complexity.
              * @returns the start of the list. Nullptr if at start of list.
              */
-            ListLinked *getPrev() const;
+            ListLinked *getPrev();
 
             /**
              * @brief Inserts item into given index of this list.
@@ -165,7 +165,7 @@ namespace VCTR
         }
 
         template <typename T>
-        ListLinked<T> *ListLinked<T>::getBegin() const
+        ListLinked<T> *ListLinked<T>::getBegin()
         {
 
             ListLinked *begin = this;
@@ -178,7 +178,7 @@ namespace VCTR
         }
 
         template <typename T>
-        ListLinked<T> *ListLinked<T>::getEnd() const
+        ListLinked<T> *ListLinked<T>::getEnd()
         {
 
             ListLinked *end = this;
@@ -191,13 +191,13 @@ namespace VCTR
         }
 
         template <typename T>
-        ListLinked<T> *ListLinked<T>::getNext() const
+        ListLinked<T> *ListLinked<T>::getNext()
         {
             return next_;
         }
 
         template <typename T>
-        ListLinked<T> *ListLinked<T>::getPrev() const
+        ListLinked<T> *ListLinked<T>::getPrev()
         {
             return prev_;
         }
