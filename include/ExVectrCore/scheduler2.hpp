@@ -5,6 +5,7 @@
 #include "stdint.h"
 
 // #include "list_array.hpp"
+#include "time_definitions.hpp"
 #include "list_linked.hpp"
 #include "time_source.hpp"
 #include "time_base.hpp"
@@ -56,6 +57,8 @@ namespace VCTR
                 uint16_t taskPriority_ = 100;
                 /// @brief Name of task. Max 49 characters
                 char taskName_[50];
+                /// @brief If this task allows system to sleep.
+                bool allowSleep_ = true;
 
             private:
                 /// @brief Use by scheduler to iterate through all attached tasks.
@@ -167,6 +170,16 @@ namespace VCTR
                 int64_t getRuntime() const;
 
                 /**
+                 * @brief Sets if the task allows the system to sleep.
+                */
+                void setAllowSleep(bool allowSleep);
+
+                /**
+                 * @returns if the task allows the system to sleep.
+                */
+                bool getAllowSleep() const;
+
+                /**
                  * @returns the scheduler calling this task. nullptr if not attached to a scheduler.
                  */
                 Scheduler const* getScheduler() const;
@@ -185,6 +198,15 @@ namespace VCTR
             // ListArray<size_t> taskIndexRun_;
             /// @brief source of time.
             Time_Source timeSource_;
+
+            /// @brief function to be called when the scheduler has nothing to do and can sleep for a given time.
+            void (*sleepFunction_)(int64_t) = nullptr;
+            /// @brief How early the scheduler should wake up from before the next task is due to run.
+            int64_t sleepMargin_ = 1*Core::MILLISECONDS;
+            /// @brief The min time the scheduler should sleep for. This could be limit by the platform.
+            int64_t minSleepTime_ = 1*Core::MILLISECONDS;
+            /// @brief The max time the scheduler should sleep for. (Will stop system from locking up if no tasks are scheduled)
+            int64_t maxSleepTime_ = 100*Core::MILLISECONDS;
 
         public:
             /**
@@ -227,6 +249,14 @@ namespace VCTR
              * @note To be called as fast and often as possible to meet timing requirements
              */
             void tick();
+
+            /**
+             * @brief Sets the function to be called when the scheduler has nothing to do and can sleep for a given time.
+             * @note The function must sleep for max the given time, but can wake up early. Wakeup interrupts can be used to react to external events immediately. (e.g. radio receive event)
+             * @param sleepFunction The function to be called for sleeping. The function should take a single int64_t parameter for the time to sleep in ns. Pass nullptr to disable sleep.
+             */
+            void setSleepFunction(void (*sleepFunction)(int64_t));
+
 
         private:
             /**

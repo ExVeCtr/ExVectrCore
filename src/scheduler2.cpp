@@ -119,7 +119,7 @@ int64_t VCTR::Core::Scheduler::getNextTaskRelease() const
 void VCTR::Core::Scheduler::tick()
 {
 
-    if (tasks_ == nullptr)
+    if (tasks_ == nullptr) //Return if there are no tasks
         return;
 
     /**
@@ -132,27 +132,41 @@ void VCTR::Core::Scheduler::tick()
     auto task = tasks_;
     auto highestPriority = 0;
     VCTR::Core::ListLinked<VCTR::Core::Scheduler::Task *> *highestPriorityTask = nullptr;
+    VCTR::Core::ListLinked<VCTR::Core::Scheduler::Task *> *nextTaskToRun = nullptr;
+    bool sleepingAllowed = true;
     while (task != nullptr)
     {
 
         (*task)[0]->taskCheck();
         (*task)[0]->pseudoPriority = getTaskPseudoPriority(*(*task)[0]);
 
-        if (!(*task)[0]->getPaused() && NOW() > (*task)[0]->getRelease())
-        {
-            (*task)[0]->misses++;
+        if (!(*task)[0]->getAllowSleep())
+            sleepingAllowed = false;
 
-            if ((*task)[0]->pseudoPriority > highestPriority)
+        if (!(*task)[0]->getPaused()) {
+
+            auto release = (*task)[0]->getRelease();
+
+            if (nextTaskToRun == nullptr || release < (*nextTaskToRun)[0]->getRelease())
+                nextTaskToRun = task;
+
+            if (NOW() > release)
             {
-                highestPriority = (*task)[0]->pseudoPriority;
-                highestPriorityTask = task;
+                (*task)[0]->misses++;
+
+                if ((*task)[0]->pseudoPriority > highestPriority)
+                {
+                    highestPriority = (*task)[0]->pseudoPriority;
+                    highestPriorityTask = task;
+                }
             }
+
         }
 
         task = task->getNext();
     }
 
-    if (highestPriorityTask != nullptr)
+    if (highestPriorityTask != nullptr) // Is a task ready to run?
     {
 
         auto taskRun = (*highestPriorityTask)[0];
@@ -183,11 +197,25 @@ void VCTR::Core::Scheduler::tick()
             }
 
         }
+
+    } else if (sleepFunction_ != nullptr && sleepingAllowed && nextTaskToRun != nullptr) { //We can sleep if we have a sleep function, sleeping is allowed by all tasks and we have a task waiting to be run
+        
+        auto sleepTime = (*nextTaskToRun)[0]->getRelease() - NOW();
+
+        if (sleepTime > sleepMargin_ + minSleepTime_)
+            sleepFunction_(sleepTime - sleepMargin_);
+
     }
 
     /*for (size_t i = 0; i < taskIndexRun_.size(); i++) {
         Core::printM("Taskrun %d, %d\n", taskIndexRun_[i], tasks_[taskIndexRun_[i]].pseudoPriority);
     }*/
+    
+}
+
+void VCTR::Core::Scheduler::setSleepFunction(void (*sleepFunction)(int64_t))
+{
+    sleepFunction_ = sleepFunction;
 }
 
 // Scheduler::Taskabstract functions
@@ -282,6 +310,16 @@ float VCTR::Core::Scheduler::Task::getRate() const
 int64_t VCTR::Core::Scheduler::Task::getRuntime() const
 {
     return taskRuntime_;
+}
+
+void VCTR::Core::Scheduler::Task::setAllowSleep(bool allowSleep)
+{
+    allowSleep_ = allowSleep;
+}
+
+bool VCTR::Core::Scheduler::Task::getAllowSleep() const
+{
+    return allowSleep_;
 }
 
 VCTR::Core::Scheduler const *VCTR::Core::Scheduler::Task::getScheduler() const
