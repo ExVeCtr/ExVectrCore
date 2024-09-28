@@ -135,7 +135,7 @@ namespace VCTR
                 uint16_t getPriority() const;
 
                 /**
-                 * Priority of the task. Higher is more likely to hit timing targets.
+                 * Priority of the task. Higher is more likely to hit timing targets. Default is 100.
                  */
                 void setPriority(uint16_t priority);
 
