@@ -469,6 +469,7 @@ namespace VCTR
 
             size_t sizeToBeCopied = toBeCopied.size();
 
+            clear();
             for (size_t i = 0; i < sizeToBeCopied; i++)
                 this->placeBack(toBeCopied[i]);
 
