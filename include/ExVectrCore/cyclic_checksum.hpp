@@ -4,6 +4,8 @@
 #include "stddef.h"
 #include "stdint.h"
 
+#include "ExVectrCore/list.hpp"
+
 namespace VCTR
 {
 
@@ -18,6 +20,14 @@ namespace VCTR
          * @return The computed checksum.
          */
         uint32_t computeCrc(const uint8_t* buf, int32_t len, int32_t initialValue);
+
+        /**
+         * Computes the CRC-16-CCITT checksum for the given list.
+         * @param buf The list to compute the checksum for.
+         * @param initialValue The initial value for the checksum.
+         * @return The computed checksum.
+         */
+        uint32_t computeCrc(const List<uint8_t> &buf, int32_t initialValue);
 
     }
 

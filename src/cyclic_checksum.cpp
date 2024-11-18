@@ -1,6 +1,7 @@
 #include "stddef.h"
 #include "stdint.h"
 
+#include "ExVectrCore/list.hpp"
 #include "ExVectrCore/cyclic_checksum.hpp"
 
 namespace VCTR
@@ -21,6 +22,25 @@ namespace VCTR
             int32_t currentValue = initialValue;
 
             for(int charCnt = 0; charCnt < len; charCnt++) {
+                char curChar = buf[charCnt];
+                for(int bitCnt = 0; bitCnt < 8; bitCnt++) {
+                    if((curChar & 0x80) ^ ((currentValue & 0x8000) >> 8)) {
+                        currentValue = ((currentValue << 1)  ^ 0x1021) & 0xFFFF; // Standard Polynom for CCSDS
+                    } else {
+                        currentValue = (currentValue << 1) & 0xFFFF;
+                    }
+                    curChar = curChar << 1;
+                }
+            }
+            return currentValue;
+
+        }
+
+        uint32_t computeCrc(const List<uint8_t> &buf, int32_t initialValue) {
+
+            int32_t currentValue = initialValue;
+
+            for(int charCnt = 0; charCnt < buf.size(); charCnt++) {
                 char curChar = buf[charCnt];
                 for(int bitCnt = 0; bitCnt < 8; bitCnt++) {
                     if((curChar & 0x80) ^ ((currentValue & 0x8000) >> 8)) {
