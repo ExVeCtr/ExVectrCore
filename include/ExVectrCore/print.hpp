@@ -8,6 +8,7 @@
 #include "stdint.h"
 #include "stdarg.h"
 
+#include "time_definitions.hpp"
 #include "topic.hpp"
 
 namespace VCTR
@@ -68,13 +69,13 @@ namespace VCTR
 
 
         #ifdef EXVECTR_DEBUG_ENABLE
-        #define LOG_MSG(...) {VCTR::Core::printD("LOG from %s, %d, %s: ", __FILE__, __LINE__, __FUNCTION__); VCTR::Core::printD(__VA_ARGS__);} // Use this to print debugging messages.
+        #define LOG_MSG(...) {VCTR::Core::printD("%.3f LOG from %s, %d, %s: ", Core::NOWSeconds(), __FILE__, __LINE__, __FUNCTION__); VCTR::Core::printD(__VA_ARGS__);} // Use this to print debugging messages.
         #else
         #define LOG_MSG(...)                     // Use this to print debugging messages. CURRENTLY DISABLED
         #endif
 
         #ifdef EXVECTR_DEBUG_VRBS_ENABLE
-        #define VRBS_MSG(...) {VCTR::Core::printD("VERBOSE from %s, %d, %s: ", __FILE__, __LINE__, __FUNCTION__); VCTR::Core::printD(__VA_ARGS__);} // Use this to print debugging messages.
+        #define VRBS_MSG(...) {VCTR::Core::printD("%.3f VERBOSE from %s, %d, %s: ", Core::NOWSeconds(), __FILE__, __LINE__, __FUNCTION__); VCTR::Core::printD(__VA_ARGS__);} // Use this to print debugging messages.
         #else
         #define VRBS_MSG(...)                     // Use this to print debugging messages. CURRENTLY DISABLED
         #endif
