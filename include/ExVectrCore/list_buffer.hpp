@@ -452,7 +452,10 @@ namespace VCTR
         {
             if (index < 0)
                 index = numElements_ + index;
-            return listBufferArray_[(front_ - index - 1) % numElements_];
+            if (index >= front_)
+                return listBufferArray_[SIZE + front_ - index%numElements_  - 1];
+            else
+                return listBufferArray_[front_ - index%numElements_  - 1];
         }
 
         template <typename T, size_t SIZE>
@@ -460,7 +463,10 @@ namespace VCTR
         {
             if (index < 0)
                 index = numElements_ + index;
-            return listBufferArray_[(front_ - index - 1) % numElements_];
+            if (index >= front_)
+                return listBufferArray_[SIZE + front_ - index%numElements_ - 1];
+            else
+                return listBufferArray_[front_ - index%numElements_  - 1];
         }
 
         template <typename T, size_t SIZE>
