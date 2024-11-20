@@ -4,6 +4,7 @@
 #include "string.h"
 #include "stdint.h"
 
+#include "ExVectrCore/print.hpp"
 #include "ExVectrCore/scheduler2.hpp"
 #include "ExVectrCore/time_definitions.hpp"
 
@@ -40,5 +41,7 @@ void VCTR::Core::Task_Periodic::taskRun()
     setRelease(deadline_);
     setDeadline(deadline_ + timeSlip_ns_);
 
+    VRBS_MSG("Task \"%s\" running app thread. \n", taskName_);
     taskThread(); // Run task.
+    VRBS_MSG("Task \"%s\" finished. \n", taskName_);
 }

@@ -119,8 +119,10 @@ int64_t VCTR::Core::Scheduler::getNextTaskRelease() const
 void VCTR::Core::Scheduler::tick()
 {
 
-    if (tasks_ == nullptr) //Return if there are no tasks
+    if (tasks_ == nullptr) {//Return if there are no tasks
+        VRBS_MSG("No tasks to run. \n");
         return;
+    }
 
     /**
      * - Iterate through the list of tasks
@@ -129,6 +131,7 @@ void VCTR::Core::Scheduler::tick()
      * - Increment the misses counter for all tasks that should run. (The selected task to run is will be set to 0, once it has run.)
      * - Run the task with the highest pseudo priority.
      */
+    //VRBS_MSG("Checking tasks. \n");
     auto task = tasks_;
     auto highestPriority = 0;
     VCTR::Core::ListLinked<VCTR::Core::Scheduler::Task *> *highestPriorityTask = nullptr;
@@ -176,16 +179,19 @@ void VCTR::Core::Scheduler::tick()
 
         if (!taskRun->getInitialised())
         {
+            VRBS_MSG("Initialising task %s. \n", taskRun->getTaskName());
             taskRun->setInitialised(true); // Before init so the task can override this when initialising.
             taskRun->taskInit();
         }
 
         if (taskRun->getInitialised()) { //Check again, as initialisation might have failed.
 
+            VRBS_MSG("Running task %s. \n", taskRun->getTaskName());
             int64_t taskStart = Core::NOW();
             taskRun->taskRun();
             int64_t taskLength = Core::NOW() - taskStart;
             taskRun->taskRuntime_ = taskRun->taskRuntime_ * 0.98 + taskLength * 0.02;
+            VRBS_MSG("Task %s took %.3fus to run. \n", taskRun->getTaskName(), float(taskLength)/Core::MICROSECONDS);
 
             if (Core::NOW() - taskRun->counterResetTimestamp >= 5 * Core::SECONDS)
             {
@@ -199,14 +205,17 @@ void VCTR::Core::Scheduler::tick()
         }
 
     } else if (sleepFunction_ != nullptr && sleepingAllowed && nextTaskToRun != nullptr) { //We can sleep if we have a sleep function, sleeping is allowed by all tasks and we have a task waiting to be run
-        
+
         auto sleepTime = (*nextTaskToRun)[0]->getRelease() - NOW();
 
-        if (sleepTime > sleepMargin_ + minSleepTime_)
+        if (sleepTime > sleepMargin_ + minSleepTime_) {
+            VRBS_MSG("Sleeping for %.3fus. \n", float(sleepTime - sleepMargin_)/Core::MICROSECONDS);
             sleepFunction_(sleepTime - sleepMargin_);
+        }
 
     }
 
+    //VRBS_MSG("Scheduler tick end. \n");
     /*for (size_t i = 0; i < taskIndexRun_.size(); i++) {
         Core::printM("Taskrun %d, %d\n", taskIndexRun_[i], tasks_[taskIndexRun_[i]].pseudoPriority);
     }*/
