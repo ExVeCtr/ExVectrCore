@@ -3,6 +3,7 @@
 
 #include "stddef.h"
 
+#include "print.hpp"
 #include "list.hpp"
 
 namespace VCTR
@@ -42,6 +43,14 @@ namespace VCTR
                 sizeControl_ = sizeControl;
                 array_ = new TYPE[1];
                 maxSize_ = 1;
+                //VRBS_MSG("Created ListArray %d. \n", this);
+            }
+
+            ListArray(const ListArray<TYPE> &listB) : ListArray(listB.sizeControl_)
+            {
+                // Copy items into ListArray
+                for (size_t i = 0; i < listB.size(); i++)
+                    append(listB[i]);
             }
 
             ~ListArray()
@@ -49,6 +58,7 @@ namespace VCTR
                 if (array_ != nullptr)
                 {
                     delete[] array_;
+                    array_ = nullptr;
                 }
             }
 
@@ -136,7 +146,7 @@ namespace VCTR
              * @brief   Will copy the items in the given list into the list. The number of items to be copied is the size of the array being copied.
              * @returns reference to this array.
              */
-            List<TYPE> &operator=(const List<TYPE> &listB);
+            List<TYPE> &operator=(const ListArray<TYPE> &listB);
 
             /**
              * This will cut down the size of the array if it is less than half full. Can cause heap fragmentation.
@@ -181,13 +191,20 @@ namespace VCTR
         template <typename TYPE>
         void ListArray<TYPE>::changeSizeTo(size_t size)
         {
-
+            //VRBS_MSG("Changing size to %d. This %d \n", size, this);
             // Leave if already same size
             if (size == maxSize_)
                 return;
 
+            if (size == 0)
+            {
+                size = 1;
+                size_ = 0;
+            }
+
             // Create new array
             TYPE *newPointer = new TYPE[size];
+            //VRBS_MSG("New pointer %d. \n", newPointer);
 
             // Move contents to new array
             size_t i;
@@ -198,6 +215,7 @@ namespace VCTR
 
             // Unallocate old array
             delete[] array_;
+            //VRBS_MSG("Deleted old array %d. \n", array_);
 
             // Switch to new array and params
             array_ = newPointer;
@@ -369,9 +387,8 @@ namespace VCTR
         }
 
         template <typename TYPE>
-        List<TYPE> &ListArray<TYPE>::operator=(const List<TYPE> &listB)
+        List<TYPE> &ListArray<TYPE>::operator=(const ListArray<TYPE> &listB)
         {
-
             clear();
 
             // Copy items into ListArray
