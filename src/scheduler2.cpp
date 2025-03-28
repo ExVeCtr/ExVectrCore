@@ -179,19 +179,19 @@ void VCTR::Core::Scheduler::tick()
 
         if (!taskRun->getInitialised())
         {
-            VRBS_MSG("Initialising task %s. \n", taskRun->getTaskName());
+            //VRBS_MSG("Initialising task %s. \n", taskRun->getTaskName());
             taskRun->setInitialised(true); // Before init so the task can override this when initialising.
             taskRun->taskInit();
         }
 
         if (taskRun->getInitialised()) { //Check again, as initialisation might have failed.
 
-            VRBS_MSG("Running task %s. \n", taskRun->getTaskName());
+            //VRBS_MSG("Running task %s. \n", taskRun->getTaskName());
             int64_t taskStart = Core::NOW();
             taskRun->taskRun();
             int64_t taskLength = Core::NOW() - taskStart;
             taskRun->taskRuntime_ = taskRun->taskRuntime_ * 0.98 + taskLength * 0.02;
-            VRBS_MSG("Task %s took %.3fus to run. \n", taskRun->getTaskName(), float(taskLength)/Core::MICROSECONDS);
+            //VRBS_MSG("Task %s took %.3fus to run. \n", taskRun->getTaskName(), float(taskLength)/Core::MICROSECONDS);
 
             if (Core::NOW() - taskRun->counterResetTimestamp >= 5 * Core::SECONDS)
             {
@@ -209,7 +209,7 @@ void VCTR::Core::Scheduler::tick()
         auto sleepTime = (*nextTaskToRun)[0]->getRelease() - NOW();
 
         if (sleepTime > sleepMargin_ + minSleepTime_) {
-            VRBS_MSG("Sleeping for %.3fus. \n", float(sleepTime - sleepMargin_)/Core::MICROSECONDS);
+            //VRBS_MSG("Sleeping for %.3fus. \n", float(sleepTime - sleepMargin_)/Core::MICROSECONDS);
             sleepFunction_(sleepTime - sleepMargin_);
         }
 

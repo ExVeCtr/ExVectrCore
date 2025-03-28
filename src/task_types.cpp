@@ -41,7 +41,7 @@ void VCTR::Core::Task_Periodic::taskRun()
     setRelease(deadline_);
     setDeadline(deadline_ + timeSlip_ns_);
 
-    VRBS_MSG("Task \"%s\" running app thread. \n", taskName_);
+    //VRBS_MSG("Task \"%s\" running app thread. \n", taskName_);
     taskThread(); // Run task.
-    VRBS_MSG("Task \"%s\" finished. \n", taskName_);
+    //VRBS_MSG("Task \"%s\" finished. \n", taskName_);
 }
