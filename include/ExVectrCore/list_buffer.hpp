@@ -452,7 +452,7 @@ namespace VCTR
         {
             if (index < 0)
                 index = numElements_ + index;
-            if (index >= front_)
+            if (index >= int32_t(front_))
                 return listBufferArray_[SIZE + front_ - index%numElements_  - 1];
             else
                 return listBufferArray_[front_ - index%numElements_  - 1];
@@ -463,7 +463,7 @@ namespace VCTR
         {
             if (index < 0)
                 index = numElements_ + index;
-            if (index >= front_)
+            if (index >= int32_t(front_))
                 return listBufferArray_[SIZE + front_ - index%numElements_ - 1];
             else
                 return listBufferArray_[front_ - index%numElements_  - 1];
