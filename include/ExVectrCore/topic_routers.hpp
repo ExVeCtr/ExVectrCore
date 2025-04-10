@@ -19,7 +19,8 @@ namespace VCTR
          */
 
         /**
-         * This router simply transfers data from one topic to all other topics.
+         * @brief This router simply transfers data from one topic to all other topics.
+         * @note This is monodirectional. It only transfers from subscribed topic to forward topics. Use multiple routers to transfer in both directions.
          */
         template <typename TYPE>
         class TopicRouter : public Subscriber_Interface<TYPE>
@@ -27,8 +28,27 @@ namespace VCTR
         private:
             ListArray<Topic<TYPE> *> topicsList_;
 
+            int64_t minimalInterval_ = 0; // Minimal interval between messages. Used to prevent flooding the bus with messages.
+            int64_t lastTime_ = 0; // Last time a message was sent. Used to prevent flooding the bus with messages.
+
+
         public:
-            TopicRouter() {}
+            
+            /**
+             * @brief Constructor for the TopicRouter class.
+             * @param minimalInterval Minimal interval between messages. Used to prevent flooding the bus with messages.
+             */
+            TopicRouter(int64_t minimalInterval = 0) : minimalInterval_(minimalInterval) {}
+
+            void setInterval(int64_t interval)
+            {
+                minimalInterval_ = interval;
+            }
+
+            int64_t getInterval()
+            {
+                return minimalInterval_;
+            }
 
             /**
              * @returns True if new data was received
@@ -53,6 +73,15 @@ namespace VCTR
         template <typename TYPE>
         void TopicRouter<TYPE>::receive(TYPE &item, const Topic<TYPE> *topic)
         {
+
+            // Check if the time since last message is greater than the minimal interval. If not, do not forward the message.
+            if ((Core::NOW() - lastTime_) < minimalInterval_)
+            {
+                return;
+            }
+            
+            lastTime_ = Core::NOW();
+
             for (size_t i = 0; i < topicsList_.size(); i++)
             {
                 Topic<TYPE> *topicForward = topicsList_[i];
