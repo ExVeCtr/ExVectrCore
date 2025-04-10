@@ -1,6 +1,7 @@
 #include "ExVectrCore/scheduler2.hpp"
 
 #include "stddef.h"
+#include "string.h"
 #include "stdint.h"
 
 #include "ExVectrCore/list.hpp"
@@ -91,7 +92,7 @@ int32_t VCTR::Core::Scheduler::getTaskPseudoPriority(const VCTR::Core::Scheduler
     /*if (NOW() > task.getDeadline())
         return INT32_MAX;*/
 
-    auto pseudoPriority = criteria1 + criteria3 * 10;
+    auto pseudoPriority = criteria3 * 10 + task.getPriority();//10 + criteria1 + criteria3 * 10;
     if (pseudoPriority > INT32_MAX)
         pseudoPriority = INT32_MAX;
 
@@ -186,12 +187,12 @@ void VCTR::Core::Scheduler::tick()
 
         if (taskRun->getInitialised()) { //Check again, as initialisation might have failed.
 
-            //VRBS_MSG("Running task %s. \n", taskRun->getTaskName());
+            VRBS_MSG("Running task %s. \n", taskRun->getTaskName());
             int64_t taskStart = Core::NOW();
             taskRun->taskRun();
             int64_t taskLength = Core::NOW() - taskStart;
             taskRun->taskRuntime_ = taskRun->taskRuntime_ * 0.98 + taskLength * 0.02;
-            //VRBS_MSG("Task %s took %.3fus to run. \n", taskRun->getTaskName(), float(taskLength)/Core::MICROSECONDS);
+            VRBS_MSG("Task %s took %.3fus to run. \n", taskRun->getTaskName(), float(taskLength)/Core::MICROSECONDS);
 
             if (Core::NOW() - taskRun->counterResetTimestamp >= 5 * Core::SECONDS)
             {
@@ -232,7 +233,17 @@ void VCTR::Core::Scheduler::setSleepFunction(void (*sleepFunction)(int64_t))
 VCTR::Core::Scheduler::Task::Task()
 {
     taskListElement_[0] = this;
-    taskName_[0] = '\0';
+
+    taskName_[49] = '\0'; //Make sure end.
+    taskName_[0] = '\0'; //Make sure end.
+}
+
+VCTR::Core::Scheduler::Task::Task(char const *taskName)
+{
+    taskListElement_[0] = this;
+
+    strncpy(taskName_, taskName, 50);
+    taskName_[49] = '\0'; //Make sure end.
 }
 
 VCTR::Core::Scheduler::Task::~Task()

@@ -8,7 +8,8 @@
 #include "ExVectrCore/scheduler2.hpp"
 #include "ExVectrCore/time_definitions.hpp"
 
-VCTR::Core::Task_Periodic::Task_Periodic(const char *taskName, int64_t interval_ns, int64_t start, int64_t timeSlip_ns, bool skipOverdueRun)
+VCTR::Core::Task_Periodic::Task_Periodic(const char *taskName, int64_t interval_ns, int64_t start, int64_t timeSlip_ns, bool skipOverdueRun) :
+    Task(taskName)
 {
     interval_ns_ = interval_ns;
     offset_ = start;
@@ -16,9 +17,6 @@ VCTR::Core::Task_Periodic::Task_Periodic(const char *taskName, int64_t interval_
 
     setRelease(start);
     setDeadline(start + timeSlip_ns);
-
-    strncpy(taskName_, taskName, 50);
-    taskName_[49] = '\0'; //Make sure end.
 
 }
 

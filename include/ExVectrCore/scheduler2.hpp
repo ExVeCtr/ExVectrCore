@@ -77,9 +77,15 @@ namespace VCTR
             public:
 
                 /**
-                 * @brief Task ctor.
+                 * @brief Basic ctor.
                  */
                 Task();
+
+                /**
+                 * @brief Task ctor.
+                 * @param taskName Name of task upto 50 chars.
+                 */
+                Task(char const *taskName);
 
                 virtual ~Task();
 
