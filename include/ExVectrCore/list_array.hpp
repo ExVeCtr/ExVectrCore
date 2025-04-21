@@ -73,9 +73,10 @@ namespace VCTR
             size_t getInternalArrayLength() const;
 
             /**
+             * @note Be careful to not write out of bounds!
              * @returns internal array pointer.
              */
-            const TYPE *getPtr() const;
+            TYPE *getPtr();
 
             /**
              * Adds a copy of the given item to the ListArray.
@@ -236,7 +237,7 @@ namespace VCTR
         }
 
         template <typename TYPE>
-        const TYPE *ListArray<TYPE>::getPtr() const
+        TYPE *ListArray<TYPE>::getPtr()
         {
             return array_;
         }
