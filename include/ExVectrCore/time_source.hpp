@@ -66,6 +66,12 @@ namespace VCTR
              */
             void forceCorrect(Clock_Source &source);
 
+            /**
+             * @brief sets the clock to the given time. Will calculate the offset to synchronise to the given time.
+             * @param time Time to set the clock to in nanoseconds.
+             */
+            void setTime(int64_t time);
+
         private:
             /**
              * It triggered by new time data published

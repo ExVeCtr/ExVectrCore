@@ -27,7 +27,11 @@ void VCTR::Core::Time_Source::forceCorrect(Clock_Source &source) {
     offset_ = source.getCounter().data - source.getCounter().timestamp;
 }
 
+void VCTR::Core::Time_Source::setTime(int64_t time) {
+    offset_ = time - VCTR::Core::NOW();
+}
+
 void VCTR::Core::Time_Source::receive(Timestamped<int64_t> const &item, const Topic<Timestamped<int64_t>> *topic) {
-    
+    setTime(item.data + (Core::NOW() - item.timestamp));
 }
 
