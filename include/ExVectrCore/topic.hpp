@@ -2,9 +2,12 @@
 #define EXVECTRCORE_TOPIC_H
 
 #include "stddef.h"
-// #include "list_array.hpp"
-#include "list_linked.hpp"
-#include "list_static.hpp"
+
+#include "list_array.hpp"
+//#include "list_linked.hpp"
+//#include "list_static.hpp"
+
+
 
 namespace VCTR
 {
@@ -22,8 +25,8 @@ namespace VCTR
 
         private:
             // List of subscribers.
-            // ListArray<Subscriber_Interface<TYPE> *> subscribers_;
-            ListLinked<Subscriber<TYPE> *> *subListStart_ = nullptr;
+            ListArray<Subscriber<TYPE> *> subscribers_;
+            //ListLinked<Subscriber<TYPE> *> *subListStart_ = nullptr;
 
         public:
             Topic() {}
@@ -70,7 +73,7 @@ namespace VCTR
             // Topic should only give items if this is true.
             bool receiveItems_ = true;
             // Element to topic subscriber list
-            ListLinked<Subscriber<TYPE> *> subListElement_;
+            //ListLinked<Subscriber<TYPE> *> subListElement_;
             // Topic this is subscribed to. Is nullptr if not subscribed.
             Topic<TYPE> *subbedTopic_ = nullptr;
 
@@ -78,7 +81,8 @@ namespace VCTR
             Subscriber()
             {
                 receiveItems_ = true;
-                subListElement_[0] = this;
+                subbedTopic_ = nullptr;
+                //subListElement_[0] = this;
             }
 
             virtual ~Subscriber()
@@ -134,18 +138,19 @@ namespace VCTR
         template <typename TYPE>
         const List<Subscriber<TYPE> *> &Topic<TYPE>::getSubscriberList() const
         {
-            if (subListStart_ == nullptr)
+            /*if (subListStart_ == nullptr)
             {
                 return ListStatic<Subscriber<TYPE> *, 0>();
             }
-            return *subListStart_;
+            return *subListStart_;*/
+            return subscribers_;
         }
 
         template <typename TYPE>
         void Topic<TYPE>::unsubscribeAll()
         {
             
-            if (subListStart_ == nullptr)
+            /*if (subListStart_ == nullptr)
                 return;
 
             ListLinked<Subscriber<TYPE> *> *item = subListStart_->getEnd();
@@ -154,6 +159,11 @@ namespace VCTR
 
                 (*item)[0]->unsubscribe();
                 item = item->getPrev();
+            }*/
+            auto numSubs = subscribers_.size();
+            for (size_t i = 0; i < numSubs && subscribers_.size() > 0; i++)
+            {
+                subscribers_[subscribers_.size()-1]->unsubscribe(); //Unsubscribe each subscriber, starting from back to improve performance due to list implementation.
             }
 
         }
@@ -162,7 +172,9 @@ namespace VCTR
         void Topic<TYPE>::publish(const TYPE &item)
         {
 
-            ListLinked<Subscriber<TYPE> *> *next = subListStart_;
+            publish(item, nullptr); //Publish to all subscribers except the one that called this function. This is used to prevent infinite loops.
+
+            /*ListLinked<Subscriber<TYPE> *> *next = subListStart_;
             if (subListStart_ == nullptr)
                 return;
 
@@ -173,14 +185,22 @@ namespace VCTR
                     (*next)[0]->receive(item, this);
                 }
                 next = next->getNext();
-            } while (next != nullptr && next != subListStart_);
+            } while (next != nullptr && next != subListStart_);*/
         }
 
         template <typename TYPE>
         void Topic<TYPE>::publish(const TYPE &item, Subscriber<TYPE> *subscriber)
         {
 
-            ListLinked<Subscriber<TYPE> *> *next = subListStart_;
+            for (size_t i = 0; i < subscribers_.size(); i++)
+            {
+                if (subscribers_[i] != subscriber && subscribers_[i]->receiveItems_)
+                {
+                    subscribers_[i]->receive(item, this);
+                }
+            }
+
+            /*ListLinked<Subscriber<TYPE> *> *next = subListStart_;
             if (subListStart_ == nullptr)
                 return;
 
@@ -191,7 +211,7 @@ namespace VCTR
                     (*next)[0]->receive(item, this);
                 }
                 next = next->getNext();
-            } while (next != nullptr && next != subListStart_);
+            } while (next != nullptr && next != subListStart_);*/
         }
 
         template <typename TYPE>
@@ -205,9 +225,13 @@ namespace VCTR
         void Subscriber<TYPE>::subscribe(Topic<TYPE> &topic)
         {   
 
+            unsubscribe(); //Unsubscribe from previous topic.
+
             subbedTopic_ = &topic;
 
-            if (topic.subListStart_ == nullptr)
+            topic.subscribers_.appendIfNotInListArray(this); //Add this subscriber to the topic subscriber list.
+
+            /*if (topic.subListStart_ == nullptr)
             {
                 topic.subListStart_ = &subListElement_;
                 return;
@@ -223,7 +247,7 @@ namespace VCTR
                 }
             }
 
-            topic.subListStart_->append(subListElement_);
+            topic.subListStart_->append(subListElement_);*/
 
         }
 
@@ -233,8 +257,11 @@ namespace VCTR
 
             if (subbedTopic_ == nullptr) //Already not subscribed.
                 return; 
+
+            subbedTopic_->subscribers_.removeAllEqual(this); //Remove this subscriber from the topic subscriber list.
+            subbedTopic_ = nullptr; //Set the topic to nullptr.
             
-            if (subbedTopic_->subListStart_ == &subListElement_) //We are start of list. Set topic list begin to next element. If we are last then this will be nullptr.
+            /*if (subbedTopic_->subListStart_ == &subListElement_) //We are start of list. Set topic list begin to next element. If we are last then this will be nullptr.
             {
                 subbedTopic_->subListStart_ = subListElement_.getNext();
                 subbedTopic_ = nullptr;
@@ -248,7 +275,7 @@ namespace VCTR
                     (*next).remove();
             }
 
-            subbedTopic_ = nullptr;
+            subbedTopic_ = nullptr;*/
 
         }
 
