@@ -4,8 +4,9 @@
 #include "stddef.h"
 #include "stdint.h"
 
-#include "scheduler2.hpp"
 #include "time_definitions.hpp"
+#include "scheduler2.hpp"
+
 
 namespace VCTR
 {

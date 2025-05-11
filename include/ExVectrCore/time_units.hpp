@@ -1,9 +1,9 @@
 #ifndef EXVECTRCORE_TIMEUNITS_H
 #define EXVECTRCORE_TIMEUNITS_H
 
-#include "time_definitions.hpp"
-
 #include "stdint.h"
+
+#include "time_definitions.hpp"
 
 namespace VCTR
 {
