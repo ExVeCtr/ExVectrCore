@@ -83,7 +83,7 @@ int32_t VCTR::Core::Scheduler::getTaskPseudoPriority(const VCTR::Core::Scheduler
 
     // Currently only using the first and third criteria.
 
-    size_t criteria1 = SIZE_MAX / (task.getDeadline() - task.getRelease() + 1);
+    //size_t criteria1 = SIZE_MAX / (task.getDeadline() - task.getRelease() + 1);
     //size_t criteria2 = task.getPriority();
     size_t criteria3 = task.misses;
     //size_t criteria4 = task.taskRuntime_;
