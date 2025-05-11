@@ -1,11 +1,14 @@
 #ifndef EXVECTRCORE_TOPICSUBSCRIBERS_H
 #define EXVECTRCORE_TOPICSUBSCRIBERS_H
 
-#include "topic.hpp"
+
+#include "stddef.h"
+
 #include "list_buffer.hpp"
 #include "list_array.hpp"
 
-#include "stddef.h"
+#include "topic.hpp"
+
 
 namespace VCTR
 {
@@ -82,6 +85,31 @@ namespace VCTR
              */
             Topic_Publisher(Topic<TYPE> &topic) { subscribe(topic); }
         };
+
+
+        /**
+         * This subscriber simply forwards received data to the internal topic. This can be used to switch input data between different subscribers.
+         */
+        template <typename TYPE>
+        class Topic_Switch : public Subscriber<TYPE>
+        {
+        private:
+
+            Core::Topic<TYPE> internalTopic_;
+
+            void receive(TYPE const &item, const Topic<TYPE> *topic) override
+            {
+                internalTopic_.publish(item); // Publish to internal topic. This will not call this function again.
+            }
+
+        public:
+
+            Topic_Switch() {}
+
+            auto& getTopic() { return internalTopic_; }
+
+        };
+
 
         /**
          * This subscriber implements a Fifo. New items are placed into Fifo front.
@@ -197,7 +225,7 @@ namespace VCTR
              */
             StaticCallback_Subscriber(Topic<TYPE> &topic, void (*callbackFunc)(TYPE const &item))
             {
-                subscribe(topic);
+                this->subscribe(topic);
                 callbackFunc_ = callbackFunc;
             }
 
