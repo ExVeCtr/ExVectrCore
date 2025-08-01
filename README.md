@@ -13,7 +13,7 @@ As mentioned above, ExVeCtr can be used for pretty much anything. ExVeCtr places
 ## When should ExVeCtr not be used?
 It should not be used on critical long life applications due to the experimental nature and some trade-offs like the used of dynamic arrays that can cause heap fragmentation. Do not run on an Arduino Uno or similarily constrained controllers.
 
-## **This project is under initial development. Things will probably break.**
+# **This project is under initial development. Things will probably break.**
 ## ToDo:
 - [X] Port, modify and clean/fix utilities from EasyVTOL.
 - [X] Add support for multiple time sources ~~(One is internal/Precise) !! High priority from Scheduler !!~~
@@ -23,18 +23,14 @@ It should not be used on critical long life applications due to the experimental
 - [X] Redo scheduling for use of new tasks and time sources utilities.    ~~!! Currently broken. Upmost priority !!~~
 - [X] Create math library
 - [X] Create data processing and structure library.
-- [ ] Create a buffer data handling class for storing raw data into pointers.
-- [ ] Create a global message topic system.
-- [ ] Create memory library (Storing memory onto EEPROM or Other stuff)
+- [X] Create memory library (Storing memory onto EEPROM or Other stuff)
 - [X] Create sensor library.
 - [X] Create networking library.
 - [ ] Finally implement starship test vehicle. (Probably create a vehicle library)
-- [ ] Simulation library. 
-- [ ] Create irrigation library. 
-- [ ] 3D graphics library for simulations?
+- [ ] Simulation library.
+- [ ] 3D graphics library for simulations
 - [ ] Documentation.
 ## Issues:
-- [ ] High priority! Redo subscriber, topic system as it has failure modes.
 ## To be implemented into a platform library:
 A platform library is required for the ExVectrCore to run. The following functions must be implemented inside a .cpp file:
 - `getPlatformClock();` Found inside the `time_base.hpp` header file. This returns a clock giving the time since startup.

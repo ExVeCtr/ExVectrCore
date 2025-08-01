@@ -1,11 +1,11 @@
-#include "ExVectrCore/print.hpp"
-
 #include "stddef.h"
 #include "stdint.h"
 #include "stdarg.h"
 
 #include "ExVectrCore/topic.hpp"
 #include "ExVectrCore/list_array.hpp"
+
+#include "ExVectrCore/print.hpp"
 
 ///////////////////////////////////////////////////////////////////////////////
 //                      Below is the API for a support library
@@ -106,7 +106,7 @@ void _putchar(char c)
 
     chars.append(c);
     if (c == '\0')
-    {   
+    {
         if (currentTopic != nullptr)
             currentTopic->publish(chars.getPtr());
         chars.clear();
@@ -146,7 +146,7 @@ void VCTR::Core::printTopic(VCTR::Core::Topic<const char *> &topic, const char *
 
     va_list va;
     va_start(va, format);
-    /*const int ret =*/ vprintf(format, va);
+    /*const int ret =*/vprintf(format, va);
     va_end(va);
 
     currentTopic = nullptr;
@@ -158,7 +158,7 @@ void VCTR::Core::printM(const char *format, ...)
 
     va_list va;
     va_start(va, format);
-    /*const int ret =*/ vprintf(format, va);
+    /*const int ret =*/vprintf(format, va);
     va_end(va);
 
     currentTopic = nullptr;
@@ -170,7 +170,7 @@ void VCTR::Core::printD(const char *format, ...)
 
     va_list va;
     va_start(va, format);
-    /*const int ret =*/ vprintf(format, va);
+    /*const int ret =*/vprintf(format, va);
     va_end(va);
 
     currentTopic = nullptr;
@@ -182,7 +182,7 @@ void VCTR::Core::printW(const char *format, ...)
 
     va_list va;
     va_start(va, format);
-    /*const int ret =*/ vprintf(format, va);
+    /*const int ret =*/vprintf(format, va);
     va_end(va);
 
     currentTopic = nullptr;
@@ -194,13 +194,11 @@ void VCTR::Core::printE(const char *format, ...)
 
     va_list va;
     va_start(va, format);
-    /*const int ret =*/ vprintf(format, va);
+    /*const int ret =*/vprintf(format, va);
     va_end(va);
 
     currentTopic = nullptr;
 }
-
-
 
 ///////////////////////////////////////////////////////////////////////////////
 //           Below is the implementation for the support library

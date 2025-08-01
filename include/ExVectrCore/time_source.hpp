@@ -4,8 +4,8 @@
 #include "stddef.h"
 #include "stdint.h"
 
-#include "topic_subscribers.hpp"
 #include "timestamped.hpp"
+#include "topic_subscribers.hpp"
 
 #include "clock_source.hpp"
 

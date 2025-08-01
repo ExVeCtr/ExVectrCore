@@ -1,13 +1,13 @@
-#include "ExVectrCore/scheduler2.hpp"
-
 #include "stddef.h"
 #include "string.h"
 #include "stdint.h"
 
 #include "ExVectrCore/list.hpp"
-//#include "ExVectrCore/List_linked.hpp"
+// #include "ExVectrCore/List_linked.hpp"
 #include "ExVectrCore/time_definitions.hpp"
 #include "ExVectrCore/print.hpp"
+
+#include "ExVectrCore/scheduler2.hpp"
 
 /// @brief The global system scheduler
 VCTR::Core::Scheduler &VCTR::Core::getSystemScheduler()
@@ -83,16 +83,16 @@ int32_t VCTR::Core::Scheduler::getTaskPseudoPriority(const VCTR::Core::Scheduler
 
     // Currently only using the first and third criteria.
 
-    //size_t criteria1 = SIZE_MAX / (task.getDeadline() - task.getRelease() + 1);
-    //size_t criteria2 = task.getPriority();
+    // size_t criteria1 = SIZE_MAX / (task.getDeadline() - task.getRelease() + 1);
+    // size_t criteria2 = task.getPriority();
     size_t criteria3 = task.misses;
-    //size_t criteria4 = task.taskRuntime_;
+    // size_t criteria4 = task.taskRuntime_;
 
-    //size_t criteria5 = 0;
+    // size_t criteria5 = 0;
     /*if (NOW() > task.getDeadline())
         return INT32_MAX;*/
 
-    auto pseudoPriority = criteria3 * 10 + task.getPriority();//10 + criteria1 + criteria3 * 10;
+    auto pseudoPriority = criteria3 * 10 + task.getPriority(); // 10 + criteria1 + criteria3 * 10;
     if (pseudoPriority > INT32_MAX)
         pseudoPriority = INT32_MAX;
 
@@ -120,7 +120,8 @@ int64_t VCTR::Core::Scheduler::getNextTaskRelease() const
 void VCTR::Core::Scheduler::tick()
 {
 
-    if (tasks_ == nullptr) {//Return if there are no tasks
+    if (tasks_ == nullptr)
+    { // Return if there are no tasks
         VRBS_MSG("No tasks to run. \n");
         return;
     }
@@ -132,7 +133,7 @@ void VCTR::Core::Scheduler::tick()
      * - Increment the misses counter for all tasks that should run. (The selected task to run is will be set to 0, once it has run.)
      * - Run the task with the highest pseudo priority.
      */
-    //VRBS_MSG("Checking tasks. \n");
+    // VRBS_MSG("Checking tasks. \n");
     auto task = tasks_;
     auto highestPriority = 0;
     VCTR::Core::ListLinked<VCTR::Core::Scheduler::Task *> *highestPriorityTask = nullptr;
@@ -147,7 +148,8 @@ void VCTR::Core::Scheduler::tick()
         if (!(*task)[0]->getAllowSleep())
             sleepingAllowed = false;
 
-        if (!(*task)[0]->getPaused()) {
+        if (!(*task)[0]->getPaused())
+        {
 
             auto release = (*task)[0]->getRelease();
 
@@ -164,7 +166,6 @@ void VCTR::Core::Scheduler::tick()
                     highestPriorityTask = task;
                 }
             }
-
         }
 
         task = task->getNext();
@@ -180,19 +181,20 @@ void VCTR::Core::Scheduler::tick()
 
         if (!taskRun->getInitialised())
         {
-            //VRBS_MSG("Initialising task %s. \n", taskRun->getTaskName());
+            // VRBS_MSG("Initialising task %s. \n", taskRun->getTaskName());
             taskRun->setInitialised(true); // Before init so the task can override this when initialising.
             taskRun->taskInit();
         }
 
-        if (taskRun->getInitialised()) { //Check again, as initialisation might have failed.
+        if (taskRun->getInitialised())
+        { // Check again, as initialisation might have failed.
 
             VRBS_MSG("Running task %s. \n", taskRun->getTaskName());
             int64_t taskStart = Core::NOW();
             taskRun->taskRun();
             int64_t taskLength = Core::NOW() - taskStart;
             taskRun->taskRuntime_ = taskRun->taskRuntime_ * 0.98 + taskLength * 0.02;
-            VRBS_MSG("Task %s took %.3fus to run. \n", taskRun->getTaskName(), float(taskLength)/Core::MICROSECONDS);
+            VRBS_MSG("Task %s took %.3fus to run. \n", taskRun->getTaskName(), float(taskLength) / Core::MICROSECONDS);
 
             if (Core::NOW() - taskRun->counterResetTimestamp >= 5 * Core::SECONDS)
             {
@@ -202,25 +204,24 @@ void VCTR::Core::Scheduler::tick()
                 taskRun->counterResetTimestamp = Core::NOW();
                 taskRun->runCounter = 0;
             }
-
         }
-
-    } else if (sleepFunction_ != nullptr && sleepingAllowed && nextTaskToRun != nullptr) { //We can sleep if we have a sleep function, sleeping is allowed by all tasks and we have a task waiting to be run
+    }
+    else if (sleepFunction_ != nullptr && sleepingAllowed && nextTaskToRun != nullptr)
+    { // We can sleep if we have a sleep function, sleeping is allowed by all tasks and we have a task waiting to be run
 
         auto sleepTime = (*nextTaskToRun)[0]->getRelease() - NOW();
 
-        if (sleepTime > sleepMargin_ + minSleepTime_) {
-            //VRBS_MSG("Sleeping for %.3fus. \n", float(sleepTime - sleepMargin_)/Core::MICROSECONDS);
+        if (sleepTime > sleepMargin_ + minSleepTime_)
+        {
+            // VRBS_MSG("Sleeping for %.3fus. \n", float(sleepTime - sleepMargin_)/Core::MICROSECONDS);
             sleepFunction_(sleepTime - sleepMargin_);
         }
-
     }
 
-    //VRBS_MSG("Scheduler tick end. \n");
+    // VRBS_MSG("Scheduler tick end. \n");
     /*for (size_t i = 0; i < taskIndexRun_.size(); i++) {
         Core::printM("Taskrun %d, %d\n", taskIndexRun_[i], tasks_[taskIndexRun_[i]].pseudoPriority);
     }*/
-    
 }
 
 void VCTR::Core::Scheduler::setSleepFunction(void (*sleepFunction)(int64_t))
@@ -234,8 +235,8 @@ VCTR::Core::Scheduler::Task::Task()
 {
     taskListElement_[0] = this;
 
-    taskName_[49] = '\0'; //Make sure end.
-    taskName_[0] = '\0'; //Make sure end.
+    taskName_[49] = '\0'; // Make sure end.
+    taskName_[0] = '\0';  // Make sure end.
 }
 
 VCTR::Core::Scheduler::Task::Task(char const *taskName)
@@ -243,7 +244,7 @@ VCTR::Core::Scheduler::Task::Task(char const *taskName)
     taskListElement_[0] = this;
 
     strncpy(taskName_, taskName, 50);
-    taskName_[49] = '\0'; //Make sure end.
+    taskName_[49] = '\0'; // Make sure end.
 }
 
 VCTR::Core::Scheduler::Task::~Task()
