@@ -82,6 +82,12 @@ public:
   void append(const TYPE &item);
 
   /**
+   * @brief Removes the last item in the ListArray and returns it. Will return
+   * default value if ListArray is empty.
+   */
+  TYPE pop();
+
+  /**
    * Adds a copy of the given item to the ListArray only if there is no other
    * equal item already in the ListArray.
    * @param item Item to add to ListArray.
@@ -245,6 +251,20 @@ template <typename TYPE> void ListArray<TYPE>::append(const TYPE &item) {
   array_[size_] = item;
 
   size_++;
+}
+
+template <typename TYPE> TYPE ListArray<TYPE>::pop() {
+
+  if (size_ == 0)
+    return TYPE();
+
+  size_--;
+  auto item = array_[size_];
+
+  if (sizeControl_ && size_ <= maxSize_ / 2)
+    changeSizeTo(maxSize_ / 2);
+
+  return item;
 }
 
 template <typename TYPE>
