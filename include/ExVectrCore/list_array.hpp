@@ -156,22 +156,6 @@ public:
   TYPE &operator[](size_t index);
 
   /**
-   * @brief Same as operator[] but with signed index. Negative values start from
-   * end of list.
-   * @param index Index of itm to be returned.
-   * @returns reference to item in ListArray
-   */
-  TYPE &operator[](int32_t index);
-
-  /**
-   * @brief Same as operator[] but with signed index. Negative values start from
-   * end of list. Const function. Returned item cannot be modified.
-   * @param index Index of itm to be returned.
-   * @returns reference to item in ListArray
-   */
-  const TYPE &operator[](int32_t index) const;
-
-  /**
    * @param index Index of itm to be returned.
    * @returns reference to item in ListArray
    */
@@ -417,21 +401,6 @@ template <typename TYPE> void ListArray<TYPE>::clear() {
 }
 
 template <typename TYPE> TYPE &ListArray<TYPE>::operator[](size_t index) {
-  return array_[index];
-}
-
-template <typename TYPE> TYPE &ListArray<TYPE>::operator[](int32_t index) {
-  if (index < 0) {
-    index = static_cast<int32_t>(size_) + index;
-  }
-  return array_[index];
-}
-
-template <typename TYPE>
-const TYPE &ListArray<TYPE>::operator[](int32_t index) const {
-  if (index < 0) {
-    index = static_cast<int32_t>(size_) + index;
-  }
   return array_[index];
 }
 
