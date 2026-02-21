@@ -81,11 +81,22 @@ public:
    */
   void append(const TYPE &item);
 
+  template <typename ListType> void append(const ListType &list);
+
   /**
    * @brief Removes the last item in the ListArray and returns it. Will return
    * default value if ListArray is empty.
    */
   TYPE pop();
+
+  Core::ListArray<TYPE> pop(size_t numItems);
+
+  /**
+   * @brief Removes the last numItems in the ListArray without returning them.
+   * @note Faster than pop(size_t numItems).
+   * @param numItems Number of items to remove.
+   */
+  void popDiscard(size_t numItems);
 
   /**
    * Adds a copy of the given item to the ListArray only if there is no other
@@ -143,6 +154,22 @@ public:
    * @returns reference to item in ListArray
    */
   TYPE &operator[](size_t index);
+
+  /**
+   * @brief Same as operator[] but with signed index. Negative values start from
+   * end of list.
+   * @param index Index of itm to be returned.
+   * @returns reference to item in ListArray
+   */
+  TYPE &operator[](int32_t index);
+
+  /**
+   * @brief Same as operator[] but with signed index. Negative values start from
+   * end of list. Const function. Returned item cannot be modified.
+   * @param index Index of itm to be returned.
+   * @returns reference to item in ListArray
+   */
+  const TYPE &operator[](int32_t index) const;
 
   /**
    * @param index Index of itm to be returned.
@@ -253,6 +280,13 @@ template <typename TYPE> void ListArray<TYPE>::append(const TYPE &item) {
   size_++;
 }
 
+template <typename TYPE>
+template <typename ListType>
+void ListArray<TYPE>::append(const ListType &list) {
+  for (size_t i = 0; i < list.size(); i++)
+    append(list[i]);
+}
+
 template <typename TYPE> TYPE ListArray<TYPE>::pop() {
 
   if (size_ == 0)
@@ -265,6 +299,19 @@ template <typename TYPE> TYPE ListArray<TYPE>::pop() {
     changeSizeTo(maxSize_ / 2);
 
   return item;
+}
+
+template <typename TYPE>
+Core::ListArray<TYPE> ListArray<TYPE>::pop(size_t numItems) {
+  Core::ListArray<TYPE> poppedItems;
+  poppedItems.setSize(numItems);
+  for (size_t i = 0; i < numItems; i++) {
+    if (size_ == 0)
+      break;
+    poppedItems[i] = pop();
+  }
+
+  return poppedItems;
 }
 
 template <typename TYPE>
@@ -370,6 +417,21 @@ template <typename TYPE> void ListArray<TYPE>::clear() {
 }
 
 template <typename TYPE> TYPE &ListArray<TYPE>::operator[](size_t index) {
+  return array_[index];
+}
+
+template <typename TYPE> TYPE &ListArray<TYPE>::operator[](int32_t index) {
+  if (index < 0) {
+    index = static_cast<int32_t>(size_) + index;
+  }
+  return array_[index];
+}
+
+template <typename TYPE>
+const TYPE &ListArray<TYPE>::operator[](int32_t index) const {
+  if (index < 0) {
+    index = static_cast<int32_t>(size_) + index;
+  }
   return array_[index];
 }
 
