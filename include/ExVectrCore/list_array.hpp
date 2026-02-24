@@ -81,7 +81,7 @@ public:
    */
   void append(const TYPE &item);
 
-  template <typename ListType> void append(const ListType &list);
+  template <typename ListType> void appendList(const ListType &list);
 
   /**
    * @brief Removes the last item in the ListArray and returns it. Will return
@@ -266,7 +266,7 @@ template <typename TYPE> void ListArray<TYPE>::append(const TYPE &item) {
 
 template <typename TYPE>
 template <typename ListType>
-void ListArray<TYPE>::append(const ListType &list) {
+void ListArray<TYPE>::appendList(const ListType &list) {
   for (size_t i = 0; i < list.size(); i++)
     append(list[i]);
 }
