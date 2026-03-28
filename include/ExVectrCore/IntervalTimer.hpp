@@ -51,7 +51,7 @@ public:
   /// \param callback    Invoked on each edge transition.
   /// \param mode        Periodic or OneShot.
   /// \param missPolicy  How to handle missed intervals.
-  IntervalTimer(int64_t period, int64_t highTime, Callback callback,
+  IntervalTimer(int64_t period, int64_t highTime, Callback callback = nullptr,
                 TimerMode mode = TimerMode::Periodic,
                 MissPolicy missPolicy = MissPolicy::SkipMissed);
 
@@ -130,6 +130,9 @@ public:
   /// Nanoseconds elapsed within the current cycle [0 .. period).
   int64_t getCycleElapsed() const;
   int64_t getCycleElapsed(int64_t nowNs) const;
+
+  /// Percent elapsed within the current cycle [0 .. 1].
+  float getCycleElapsedPercent() const;
 
   /// Number of full cycles completed since start().
   int64_t getCompletedCycles() const;

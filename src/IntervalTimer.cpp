@@ -61,6 +61,13 @@ void IntervalTimer::setPeriod(int64_t periodNs) {
   // Clamp highTime to new period
   if (highTime > period)
     highTime = period;
+
+  // Avoid artificial edge detection after runtime reconfiguration.
+  if (running && period > 0) {
+    const int64_t nowNs = NOW();
+    wasHigh = isHighAtPosition(cyclePosition(nowNs));
+    lastUpdateNs = nowNs;
+  }
 }
 
 int64_t IntervalTimer::getPeriod() const { return period; }
@@ -71,6 +78,13 @@ void IntervalTimer::setHighTime(int64_t highTimeNs) {
     highTime = period;
   if (highTime < 0)
     highTime = 0;
+
+  // Avoid artificial edge detection after runtime reconfiguration.
+  if (running && period > 0) {
+    const int64_t nowNs = NOW();
+    wasHigh = isHighAtPosition(cyclePosition(nowNs));
+    lastUpdateNs = nowNs;
+  }
 }
 
 int64_t IntervalTimer::getHighTime() const { return highTime; }
@@ -92,12 +106,14 @@ void IntervalTimer::setFallingEdgeOffset(int64_t offsetNs) {
 }
 
 void IntervalTimer::setCallback(Callback callback) {
-  callback = std::move(callback);
+  this->callback = std::move(callback);
 }
 
-void IntervalTimer::setMode(TimerMode mode) { mode = mode; }
+void IntervalTimer::setMode(TimerMode mode) { this->mode = mode; }
 
-void IntervalTimer::setMissPolicy(MissPolicy policy) { missPolicy = policy; }
+void IntervalTimer::setMissPolicy(MissPolicy policy) {
+  this->missPolicy = policy;
+}
 
 // ════════════════════════════════════════════════════════════════════
 // Synchronisation
@@ -131,6 +147,12 @@ int64_t IntervalTimer::getCycleElapsed(int64_t nowNs) const {
   if (period <= 0)
     return 0;
   return cyclePosition(nowNs);
+}
+
+float IntervalTimer::getCycleElapsedPercent() const {
+  if (period <= 0)
+    return 0.0f;
+  return static_cast<float>(getCycleElapsed()) / static_cast<float>(period);
 }
 
 int64_t IntervalTimer::getCompletedCycles() const {
@@ -181,7 +203,7 @@ void IntervalTimer::processEdges(int64_t nowNs) {
       callback(EdgeType::Rising);
       if (mode == TimerMode::OneShot) {
         firedOneShot = true;
-        wasHigh = curHigh;
+        wasHigh = isHighAtPosition(cyclePosition(nowNs));
         return;
       }
     }
@@ -259,7 +281,8 @@ void IntervalTimer::processEdges(int64_t nowNs) {
     }
   }
 
-  wasHigh = curHigh;
+  // Re-evaluate with current settings in case callback changed duty/period.
+  wasHigh = isHighAtPosition(cyclePosition(nowNs));
 }
 
 } // namespace VCTR::Core
