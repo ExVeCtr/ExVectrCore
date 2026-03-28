@@ -8,10 +8,10 @@
 namespace VCTR::Core {
 template <typename T>
 concept CanSerialize =
-    requires(const T a, uint8_t *buffer, const uint8_t *readBuffer) {
-      { a.numBytes() } -> std::convertible_to<size_t>;
-      { a.serialize(buffer) } -> std::same_as<void>;
-      { T::deserialize(readBuffer) } -> std::same_as<T>;
+    requires(T a, const T ca, uint8_t *buffer, const uint8_t *readBuffer) {
+      { ca.numBytes() } -> std::convertible_to<size_t>;
+      { ca.serialize(buffer) } -> std::same_as<void>;
+      { a.deserialize(readBuffer) } -> std::same_as<bool>;
     };
 }; // namespace VCTR::Core
 
