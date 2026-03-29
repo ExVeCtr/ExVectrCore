@@ -22,6 +22,7 @@ void IntervalTimer::start() { start(NOW()); }
 
 void IntervalTimer::start(int64_t originNs) {
   origin = originNs;
+  phaseOffset = 0;
   lastUpdateNs = originNs;
   wasHigh = false; // cycle starts at position 0 → rising edge pending
   running = true;
@@ -50,6 +51,17 @@ void IntervalTimer::update(int64_t nowNs) {
 
   processEdges(nowNs);
   lastUpdateNs = nowNs;
+}
+
+bool IntervalTimer::needUpdate() const {
+  if (!running)
+    return false;
+  if (period <= 0)
+    return false;
+
+  const int64_t nowNs = NOW();
+  const int64_t elapsed = nowNs - lastUpdateNs;
+  return elapsed >= period || isHighAtPosition(cyclePosition(nowNs)) != wasHigh;
 }
 
 // ════════════════════════════════════════════════════════════════════
@@ -120,12 +132,30 @@ void IntervalTimer::setMissPolicy(MissPolicy policy) {
 // ════════════════════════════════════════════════════════════════════
 
 void IntervalTimer::sync(int64_t syncTimestampNs) {
-  origin = syncTimestampNs;
-  // Do NOT reset m_WasHigh — the next update() will detect any edge
-  // crossing caused by the phase jump and fire accordingly.
+  if (period <= 0)
+    return;
+  // Compute the phase offset that places a rising edge exactly at
+  // syncTimestampNs.  We reduce modulo period so phaseOffset always
+  // stays within [0, period) — never exceeding one full interval.
+  int64_t raw = (syncTimestampNs - origin) % period;
+  if (raw < 0)
+    raw += period;
+  phaseOffset = raw;
+  // Do NOT reset wasHigh — the next update() will detect any edge
+  // crossing caused by the phase adjustment and fire accordingly.
 }
 
-void IntervalTimer::adjustPhase(int64_t deltaNs) { origin += deltaNs; }
+int64_t IntervalTimer::getTimingOffset() const {
+  if (!running)
+    return 0;
+  return phaseOffset;
+}
+
+void IntervalTimer::adjustPhase(int64_t deltaNs) { phaseOffset += deltaNs; }
+
+int64_t IntervalTimer::getPhaseOffset() const { return phaseOffset; }
+
+void IntervalTimer::clearPhaseOffset() { phaseOffset = 0; }
 
 // ════════════════════════════════════════════════════════════════════
 // State queries
@@ -162,10 +192,30 @@ int64_t IntervalTimer::getCompletedCycles() const {
 int64_t IntervalTimer::getCompletedCycles(int64_t nowNs) const {
   if (period <= 0)
     return 0;
-  int64_t elapsed = nowNs - origin;
+  const int64_t effectiveOrigin = origin + phaseOffset;
+  int64_t elapsed = nowNs - effectiveOrigin;
   if (elapsed < 0)
     return 0;
   return elapsed / period;
+}
+
+int64_t IntervalTimer::getIntervalStart(int32_t cycleOffset) const {
+  return getIntervalStart(cycleOffset, NOW());
+}
+
+int64_t IntervalTimer::getIntervalStart(int32_t cycleOffset,
+                                        int64_t nowNs) const {
+  const int64_t effectiveOrigin = origin + phaseOffset;
+  if (period <= 0)
+    return effectiveOrigin;
+  // Floor-divide elapsed time to find the index of the current cycle,
+  // then offset by the requested amount.
+  int64_t elapsed = nowNs - effectiveOrigin;
+  // Floor division that works for negative elapsed too.
+  int64_t currentCycle = elapsed / period;
+  if (elapsed < 0 && (elapsed % period) != 0)
+    --currentCycle;
+  return effectiveOrigin + (currentCycle + cycleOffset) * period;
 }
 
 // ════════════════════════════════════════════════════════════════════
@@ -173,7 +223,8 @@ int64_t IntervalTimer::getCompletedCycles(int64_t nowNs) const {
 // ════════════════════════════════════════════════════════════════════
 
 int64_t IntervalTimer::cyclePosition(int64_t nowNs) const {
-  int64_t elapsed = nowNs - origin;
+  const int64_t effectiveOrigin = origin + phaseOffset;
+  int64_t elapsed = nowNs - effectiveOrigin;
   // Modulo that always returns a non-negative result.
   int64_t pos = elapsed % period;
   if (pos < 0)

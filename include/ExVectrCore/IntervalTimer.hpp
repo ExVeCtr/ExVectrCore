@@ -81,6 +81,9 @@ public:
   /// deterministic test harness.
   void update(int64_t nowNs);
 
+  /// Returns true if an update() call would cause the callback to fire.
+  bool needUpdate() const;
+
   // ── Configuration (all safe to call while running) ──────────────
 
   /// Set the period in nanoseconds.
@@ -107,16 +110,33 @@ public:
 
   // ── Synchronisation ─────────────────────────────────────────────
 
-  /// Hard-reset the cycle origin so that the next rising edge aligns
-  /// with \p syncTimestampNs.  The timer continues running with the
-  /// current period.  If the reset causes an edge to be crossed
-  /// relative to the previous state, the callback will fire on the
-  /// next update().
+  /// Synchronise the timer so that the rising edge aligns with
+  /// \p syncTimestampNs.  Only the internal phase offset is modified
+  /// (origin is never touched).  The offset is always reduced modulo
+  /// the current period, so it stays within [0, period) — never
+  /// exceeding one full interval.  If the adjustment crosses an edge
+  /// relative to the previous state, the callback fires on the next
+  /// update().
   void sync(int64_t syncTimestampNs);
 
-  /// Shift the cycle origin by \p deltaNs (positive = delay,
-  /// negative = advance).  Same edge-crossing rules as sync().
+  /// Returns the current timing offset (position within the current
+  /// cycle) in nanoseconds.
+  int64_t getTimingOffset() const;
+
+  /// Shift the phase by \p deltaNs (positive = delay, negative =
+  /// advance) without modifying the origin.  The delta is accumulated
+  /// in the internal phase-offset value (see getPhaseOffset()).  Same
+  /// edge-crossing rules as sync().
   void adjustPhase(int64_t deltaNs);
+
+  /// Returns the accumulated phase offset applied on top of the origin
+  /// (nanoseconds).  This is the sum of all sync() / adjustPhase()
+  /// calls since the last start().
+  int64_t getPhaseOffset() const;
+
+  /// Clear the accumulated phase offset back to zero.  Equivalent to
+  /// calling sync(origin).
+  void clearPhaseOffset();
 
   // ── Read-only state queries ─────────────────────────────────────
 
@@ -137,6 +157,14 @@ public:
   /// Number of full cycles completed since start().
   int64_t getCompletedCycles() const;
   int64_t getCompletedCycles(int64_t nowNs) const;
+
+  /// Returns the absolute timestamp (ns) of the start of the interval
+  /// identified by \p cycleOffset relative to the current cycle.
+  ///   0 → start of the current interval
+  ///   1 → start of the next interval
+  ///  -1 → start of the previous interval, etc.
+  int64_t getIntervalStart(int32_t cycleOffset) const;
+  int64_t getIntervalStart(int32_t cycleOffset, int64_t nowNs) const;
 
 private:
   // ── Internal helpers ────────────────────────────────────────────
@@ -159,6 +187,7 @@ private:
   int64_t period = 0;       // cycle period (ns)
   int64_t highTime = 0;     // duration of HIGH phase (ns)
   int64_t origin = 0;       // absolute time of cycle start (ns)
+  int64_t phaseOffset = 0;  // accumulated offset from sync/adjustPhase (ns)
   int64_t lastUpdateNs = 0; // timestamp of previous Update()
 
   bool wasHigh = false; // phase at previous Update()

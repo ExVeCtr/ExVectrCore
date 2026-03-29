@@ -298,6 +298,12 @@ Core::ListArray<TYPE> ListArray<TYPE>::pop(size_t numItems) {
   return poppedItems;
 }
 
+template <typename TYPE> void ListArray<TYPE>::popDiscard(size_t numItems) {
+  for (size_t i = 0; i < numItems; i++) {
+    pop();
+  }
+}
+
 template <typename TYPE>
 bool ListArray<TYPE>::appendIfNotInListArray(const TYPE &item) {
 
