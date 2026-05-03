@@ -119,9 +119,8 @@ public:
   /// update().
   void sync(int64_t syncTimestampNs);
 
-  /// Returns the current timing offset (position within the current
-  /// cycle) in nanoseconds.
-  int64_t getTimingOffset() const;
+  /// @brief Calculates the phase offset from the given sync time
+  int64_t calcSyncOffset(int64_t syncTimestampNs) const;
 
   /// Shift the phase by \p deltaNs (positive = delay, negative =
   /// advance) without modifying the origin.  The delta is accumulated

@@ -106,10 +106,10 @@ void IntervalTimer::setDutyCycleRatio(float ratio) {
     ratio = 0.0f;
   if (ratio > 1.0f)
     ratio = 1.0f;
-  // Integer multiply then divide to stay in int64_t land.
-  // ratio is only used here at configuration time, not in the hot path.
-  highTime = static_cast<int64_t>(static_cast<double>(period) *
-                                  static_cast<double>(ratio));
+  // Delegate to setHighTime so that wasHigh is recalculated when the
+  // timer is already running, avoiding phantom edge detection.
+  setHighTime(static_cast<int64_t>(static_cast<double>(period) *
+                                   static_cast<double>(ratio)));
 }
 
 void IntervalTimer::setFallingEdgeOffset(int64_t offsetNs) {
@@ -134,21 +134,21 @@ void IntervalTimer::setMissPolicy(MissPolicy policy) {
 void IntervalTimer::sync(int64_t syncTimestampNs) {
   if (period <= 0)
     return;
+  phaseOffset = calcSyncOffset(syncTimestampNs);
+  // Do NOT reset wasHigh — the next update() will detect any edge
+  // crossing caused by the phase adjustment and fire accordingly.
+}
+
+int64_t IntervalTimer::calcSyncOffset(int64_t syncTimestampNs) const {
+  if (period <= 0)
+    return 0;
   // Compute the phase offset that places a rising edge exactly at
   // syncTimestampNs.  We reduce modulo period so phaseOffset always
   // stays within [0, period) — never exceeding one full interval.
   int64_t raw = (syncTimestampNs - origin) % period;
   if (raw < 0)
     raw += period;
-  phaseOffset = raw;
-  // Do NOT reset wasHigh — the next update() will detect any edge
-  // crossing caused by the phase adjustment and fire accordingly.
-}
-
-int64_t IntervalTimer::getTimingOffset() const {
-  if (!running)
-    return 0;
-  return phaseOffset;
+  return raw;
 }
 
 void IntervalTimer::adjustPhase(int64_t deltaNs) { phaseOffset += deltaNs; }

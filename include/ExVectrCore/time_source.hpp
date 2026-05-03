@@ -9,79 +9,91 @@
 
 #include "clock_source.hpp"
 
-namespace VCTR
-{
+// The ESP8266 SDK (eagle_soc.h) defines NOW() as a macro that reads a HW timer
+// register. We must undefine it so our method declaration compiles. This is
+// safe: the SDK only uses NOW() in pre-compiled .a libraries, not in any
+// headers.
+#ifdef NOW
+#undef NOW
+#endif
 
-    namespace Core
-    {
+namespace VCTR {
 
-        /**
-         * Class for getting time from different clock sources with higher precision and performance.
-         * Primarily uses internal high precision clock, but can use an external clock source to correct time for higher accuracy.
-         * This corrects the internal clock by either slowing it down or speeding up.
-         * @note Using an external time correction can cause jumps in time output (Not negative) or inconsistant time (Pause or slow down)
-         */
-        class Time_Source : public Subscriber<Timestamped<int64_t>>
-        {
-        private:
+namespace Core {
 
-            float correctionLimit_ = 1.0;
-            int64_t offset_ = 0;
-            float factor_ = 1.0;
+/**
+ * Class for getting time from different clock sources with higher precision and
+ * performance. Primarily uses internal high precision clock, but can use an
+ * external clock source to correct time for higher accuracy. This corrects the
+ * internal clock by either slowing it down or speeding up.
+ * @note Using an external time correction can cause jumps in time output (Not
+ * negative) or inconsistant time (Pause or slow down)
+ */
+class Time_Source : public Subscriber<Timestamped<int64_t>> {
+private:
+  float correctionLimit_ = 1.0;
+  int64_t offset_ = 0;
+  float factor_ = 1.0;
 
-        public:
-            /**
-             * Standard constructor.
-             */
-            Time_Source();
+public:
+  /**
+   * Standard constructor.
+   */
+  Time_Source();
 
-            /**
-             * @param source What clock to use to correct time.
-             * @param correctionAmount The maximum amount to correct time. Higher values will correct faster. 2 will double of half the internal clock speed for correction. Must be larger than 1.
-             */
-            Time_Source(Clock_Source &source, float correctionAmount = 2.0);
+  /**
+   * @param source What clock to use to correct time.
+   * @param correctionAmount The maximum amount to correct time. Higher values
+   * will correct faster. 2 will double of half the internal clock speed for
+   * correction. Must be larger than 1.
+   */
+  Time_Source(Clock_Source &source, float correctionAmount = 2.0);
 
-            /**
-             * Gets the current corrected time in nanoseconds.
-             */
-            int64_t NOW();
+  /**
+   * Gets the current corrected time in nanoseconds.
+   */
+  int64_t NOW();
 
-            /**
-             * Gets the currect corrected time in seconds as double.
-             */
-            double NOWSeconds();
+  /**
+   * Gets the currect corrected time in seconds as double.
+   */
+  double NOWSeconds();
 
-            /**
-             * Sets the clock to be used as source.
-             * @see forceCorrect() to simply correct time once
-             * @param source What clock to use to correct time.
-             * @param correctionAmount The maximum amount to correct time. Higher values will correct faster. 2 will double of half the internal clock speed for correction. Must be larger than 1.
-             */
-            void setClockSource(Clock_Source &source, float correctionAmount = 2.0);
+  /**
+   * Sets the clock to be used as source.
+   * @see forceCorrect() to simply correct time once
+   * @param source What clock to use to correct time.
+   * @param correctionAmount The maximum amount to correct time. Higher values
+   * will correct faster. 2 will double of half the internal clock speed for
+   * correction. Must be larger than 1.
+   */
+  void setClockSource(Clock_Source &source, float correctionAmount = 2.0);
 
-            /**
-             * Will correct time using given clock source only once. Might cause larges jumps in time.
-             * @note This does not change the clock source.
-             * @param source What clock to use to correct time.
-             */
-            void forceCorrect(Clock_Source &source);
+  /**
+   * Will correct time using given clock source only once. Might cause larges
+   * jumps in time.
+   * @note This does not change the clock source.
+   * @param source What clock to use to correct time.
+   */
+  void forceCorrect(Clock_Source &source);
 
-            /**
-             * @brief sets the clock to the given time. Will calculate the offset to synchronise to the given time.
-             * @param time Time to set the clock to in nanoseconds.
-             */
-            void setTime(int64_t time);
+  /**
+   * @brief sets the clock to the given time. Will calculate the offset to
+   * synchronise to the given time.
+   * @param time Time to set the clock to in nanoseconds.
+   */
+  void setTime(int64_t time);
 
-        private:
-            /**
-             * It triggered by new time data published
-             */
-            void receive(Timestamped<int64_t> const &item, const Topic<Timestamped<int64_t>> *topic) override;
-            
-        };
+private:
+  /**
+   * It triggered by new time data published
+   */
+  void receive(Timestamped<int64_t> const &item,
+               const Topic<Timestamped<int64_t>> *topic) override;
+};
 
-    }
+} // namespace Core
 
-}
+} // namespace VCTR
 
 #endif

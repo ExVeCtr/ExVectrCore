@@ -1,355 +1,323 @@
+#include <Arduino.h>
+
 #include "stddef.h"
-#include "string.h"
 #include "stdint.h"
+#include "string.h"
 
 #include "ExVectrCore/list.hpp"
 // #include "ExVectrCore/List_linked.hpp"
-#include "ExVectrCore/time_definitions.hpp"
 #include "ExVectrCore/print.hpp"
+#include "ExVectrCore/time_definitions.hpp"
 
 #include "ExVectrCore/scheduler2.hpp"
 
 /// @brief The global system scheduler
-VCTR::Core::Scheduler &VCTR::Core::getSystemScheduler()
-{
-    static VCTR::Core::Scheduler systemScheduler;
-    return systemScheduler;
+VCTR::Core::Scheduler &VCTR::Core::getSystemScheduler() {
+  static VCTR::Core::Scheduler systemScheduler;
+  return systemScheduler;
 }
 
-VCTR::Core::Scheduler::Scheduler()
-{
-    // Time source will automatically use internal system clock.
+VCTR::Core::Scheduler::Scheduler() {
+  // Time source will automatically use internal system clock.
 }
 
-VCTR::Core::Scheduler::Scheduler(Clock_Source &clockSource)
-{
-    timeSource_.setClockSource(clockSource);
+VCTR::Core::Scheduler::Scheduler(Clock_Source &clockSource) {
+  timeSource_.setClockSource(clockSource);
 }
 
-const VCTR::Core::List<VCTR::Core::Scheduler::Task *> &VCTR::Core::Scheduler::getTasks() const
-{
+const VCTR::Core::List<VCTR::Core::Scheduler::Task *> &
+VCTR::Core::Scheduler::getTasks() const {
 
-    if (tasks_ == nullptr)
-        return List<Task *>::empty();
+  if (tasks_ == nullptr)
+    return List<Task *>::empty();
 
-    return *tasks_;
+  return *tasks_;
 }
 
-bool VCTR::Core::Scheduler::addTask(Scheduler::Task &task)
-{
+bool VCTR::Core::Scheduler::addTask(Scheduler::Task &task) {
 
-    if (tasks_ == nullptr)
-        tasks_ = &task.taskListElement_;
-    else
-        tasks_->append(task.taskListElement_);
+  if (tasks_ == nullptr)
+    tasks_ = &task.taskListElement_;
+  else
+    tasks_->append(task.taskListElement_);
 
-    task.scheduler_ = this;
+  task.scheduler_ = this;
 
-    return true;
+  return true;
 }
 
-bool VCTR::Core::Scheduler::removeTask(Scheduler::Task &task)
-{
+bool VCTR::Core::Scheduler::removeTask(Scheduler::Task &task) {
 
-    // Iterate through the list and find if the task is in the list. Remove if found.
-    auto list = tasks_;
-    while (list != nullptr)
-    {
-        if (list == &task.taskListElement_)
-        {
+  // Iterate through the list and find if the task is in the list. Remove if
+  // found.
+  auto list = tasks_;
+  while (list != nullptr) {
+    if (list == &task.taskListElement_) {
 
-            if (list == tasks_)
-                tasks_ = list->getNext();
+      if (list == tasks_)
+        tasks_ = list->getNext();
 
-            list->remove();
-            task.scheduler_ = nullptr;
-            return true;
+      list->remove();
+      task.scheduler_ = nullptr;
+      return true;
+    }
+    list = list->getNext();
+  }
+
+  return false;
+}
+
+int32_t VCTR::Core::Scheduler::getTaskPseudoPriority(
+    const VCTR::Core::Scheduler::Task &task) {
+
+  // Calculate the pseudo priority of the task using the following criteria:
+  //  - Tighter scheduling between release and deadline results in higher
+  //  priority.
+  //  - Higher priority results in higher priority.
+  //  - More misses results in higher priority.
+  //  - Higher runtime results in lower priority.
+  //  - Closer to the deadline results in higher priority.
+
+  // Currently only using the first and third criteria.
+
+  // size_t criteria1 = SIZE_MAX / (task.getDeadline() - task.getRelease() + 1);
+  // size_t criteria2 = task.getPriority();
+  size_t criteria3 = task.misses;
+  // size_t criteria4 = task.taskRuntime_;
+
+  // size_t criteria5 = 0;
+  /*if (NOW() > task.getDeadline())
+      return INT32_MAX;*/
+
+  auto pseudoPriority =
+      criteria3 * 10 + task.getPriority(); // 10 + criteria1 + criteria3 * 10;
+  if (pseudoPriority > INT32_MAX)
+    pseudoPriority = INT32_MAX;
+
+  return pseudoPriority;
+}
+
+int64_t VCTR::Core::Scheduler::getNextTaskRelease() const {
+
+  if (tasks_ == nullptr)
+    return VCTR::Core::END_OF_TIME;
+
+  int64_t earliest = (*tasks_)[0]->getRelease();
+  auto task = tasks_->getNext();
+  while (task != nullptr && task != tasks_) {
+    if ((*task)[0]->getRelease() < earliest)
+      earliest = (*task)[0]->getRelease();
+    task = task->getNext();
+  }
+
+  return earliest;
+}
+
+void VCTR::Core::Scheduler::tick() {
+
+  if (tasks_ == nullptr) { // Return if there are no tasks
+    VRBS_MSG("No tasks to run. \n");
+    return;
+  }
+
+  /**
+   * - Iterate through the list of tasks
+   * - Let each task update their state
+   * - Update their pseudo priority and find the task with the highest pseudo
+   * priority that should run.
+   * - Increment the misses counter for all tasks that should run. (The selected
+   * task to run is will be set to 0, once it has run.)
+   * - Run the task with the highest pseudo priority.
+   */
+  // VRBS_MSG("Checking tasks. \n");
+  auto task = tasks_;
+  auto highestPriority = 0;
+  VCTR::Core::ListLinked<VCTR::Core::Scheduler::Task *> *highestPriorityTask =
+      nullptr;
+  VCTR::Core::ListLinked<VCTR::Core::Scheduler::Task *> *nextTaskToRun =
+      nullptr;
+  bool sleepingAllowed = true;
+  while (task != nullptr) {
+
+    (*task)[0]->taskCheck();
+    (*task)[0]->pseudoPriority = getTaskPseudoPriority(*(*task)[0]);
+
+    if (!(*task)[0]->getAllowSleep())
+      sleepingAllowed = false;
+
+    if (!(*task)[0]->getPaused()) {
+
+      auto release = (*task)[0]->getRelease();
+
+      if (nextTaskToRun == nullptr ||
+          release < (*nextTaskToRun)[0]->getRelease())
+        nextTaskToRun = task;
+
+      if (NOW() > release) {
+        (*task)[0]->misses++;
+
+        if ((*task)[0]->pseudoPriority > highestPriority) {
+          highestPriority = (*task)[0]->pseudoPriority;
+          highestPriorityTask = task;
         }
-        list = list->getNext();
+      }
     }
 
-    return false;
+    task = task->getNext();
+  }
+
+  if (highestPriorityTask != nullptr) // Is a task ready to run?
+  {
+
+    auto taskRun = (*highestPriorityTask)[0];
+
+    taskRun->misses = 0;
+    taskRun->runCounter++;
+
+    if (!taskRun->getInitialised()) {
+      // VRBS_MSG("Initialising task %s. \n", taskRun->getTaskName());
+      taskRun->setInitialised(
+          true); // Before init so the task can override this when initialising.
+      taskRun->taskInit();
+    }
+
+    if (taskRun->getInitialised()) { // Check again, as initialisation might
+                                     // have failed.
+
+      // VRBS_MSG("Running task %s. \n", taskRun->getTaskName());
+      int64_t taskStart = Core::NOW();
+      taskRun->taskRun();
+      int64_t taskLength = Core::NOW() - taskStart;
+      taskRun->taskRuntime_ =
+          taskLength; // taskRun->taskRuntime_ * 0.98 + taskLength * 0.02;
+      // VRBS_MSG("Task %s took %.3fus to run. \n", taskRun->getTaskName(),
+      // float(taskLength) / Core::MICROSECONDS);
+
+      if (taskLength > Core::MILLISECONDS * 2) {
+        // Serial.printf("Task %s took %.3fms to run. \n",
+        // taskRun->getTaskName(),
+        //               double(taskLength) / Core::MILLISECONDS);
+      }
+
+      if (Core::NOW() - taskRun->counterResetTimestamp >= 5 * Core::SECONDS) {
+        float dTime =
+            float(Core::NOW() - taskRun->counterResetTimestamp) / Core::SECONDS;
+
+        taskRun->taskRate_ = float(taskRun->runCounter) / dTime;
+        taskRun->counterResetTimestamp = Core::NOW();
+        taskRun->runCounter = 0;
+      }
+    }
+  } else if (sleepFunction_ != nullptr && sleepingAllowed &&
+             nextTaskToRun !=
+                 nullptr) { // We can sleep if we have a sleep function,
+                            // sleeping is allowed by all tasks and we have a
+                            // task waiting to be run
+
+    auto sleepTime = (*nextTaskToRun)[0]->getRelease() - NOW();
+
+    if (sleepTime > sleepMargin_ + minSleepTime_) {
+      // VRBS_MSG("Sleeping for %.3fus. \n", float(sleepTime -
+      // sleepMargin_)/Core::MICROSECONDS);
+      sleepFunction_(sleepTime - sleepMargin_);
+    }
+  }
+
+  // VRBS_MSG("Scheduler tick end. \n");
+  /*for (size_t i = 0; i < taskIndexRun_.size(); i++) {
+      Core::printM("Taskrun %d, %d\n", taskIndexRun_[i],
+  tasks_[taskIndexRun_[i]].pseudoPriority);
+  }*/
 }
 
-int32_t VCTR::Core::Scheduler::getTaskPseudoPriority(const VCTR::Core::Scheduler::Task &task)
-{
-
-    // Calculate the pseudo priority of the task using the following criteria:
-    //  - Tighter scheduling between release and deadline results in higher priority.
-    //  - Higher priority results in higher priority.
-    //  - More misses results in higher priority.
-    //  - Higher runtime results in lower priority.
-    //  - Closer to the deadline results in higher priority.
-
-    // Currently only using the first and third criteria.
-
-    // size_t criteria1 = SIZE_MAX / (task.getDeadline() - task.getRelease() + 1);
-    // size_t criteria2 = task.getPriority();
-    size_t criteria3 = task.misses;
-    // size_t criteria4 = task.taskRuntime_;
-
-    // size_t criteria5 = 0;
-    /*if (NOW() > task.getDeadline())
-        return INT32_MAX;*/
-
-    auto pseudoPriority = criteria3 * 10 + task.getPriority(); // 10 + criteria1 + criteria3 * 10;
-    if (pseudoPriority > INT32_MAX)
-        pseudoPriority = INT32_MAX;
-
-    return pseudoPriority;
-}
-
-int64_t VCTR::Core::Scheduler::getNextTaskRelease() const
-{
-
-    if (tasks_ == nullptr)
-        return VCTR::Core::END_OF_TIME;
-
-    int64_t earliest = (*tasks_)[0]->getRelease();
-    auto task = tasks_->getNext();
-    while (task != nullptr && task != tasks_)
-    {
-        if ((*task)[0]->getRelease() < earliest)
-            earliest = (*task)[0]->getRelease();
-        task = task->getNext();
-    }
-
-    return earliest;
-}
-
-void VCTR::Core::Scheduler::tick()
-{
-
-    if (tasks_ == nullptr)
-    { // Return if there are no tasks
-        VRBS_MSG("No tasks to run. \n");
-        return;
-    }
-
-    /**
-     * - Iterate through the list of tasks
-     * - Let each task update their state
-     * - Update their pseudo priority and find the task with the highest pseudo priority that should run.
-     * - Increment the misses counter for all tasks that should run. (The selected task to run is will be set to 0, once it has run.)
-     * - Run the task with the highest pseudo priority.
-     */
-    // VRBS_MSG("Checking tasks. \n");
-    auto task = tasks_;
-    auto highestPriority = 0;
-    VCTR::Core::ListLinked<VCTR::Core::Scheduler::Task *> *highestPriorityTask = nullptr;
-    VCTR::Core::ListLinked<VCTR::Core::Scheduler::Task *> *nextTaskToRun = nullptr;
-    bool sleepingAllowed = true;
-    while (task != nullptr)
-    {
-
-        (*task)[0]->taskCheck();
-        (*task)[0]->pseudoPriority = getTaskPseudoPriority(*(*task)[0]);
-
-        if (!(*task)[0]->getAllowSleep())
-            sleepingAllowed = false;
-
-        if (!(*task)[0]->getPaused())
-        {
-
-            auto release = (*task)[0]->getRelease();
-
-            if (nextTaskToRun == nullptr || release < (*nextTaskToRun)[0]->getRelease())
-                nextTaskToRun = task;
-
-            if (NOW() > release)
-            {
-                (*task)[0]->misses++;
-
-                if ((*task)[0]->pseudoPriority > highestPriority)
-                {
-                    highestPriority = (*task)[0]->pseudoPriority;
-                    highestPriorityTask = task;
-                }
-            }
-        }
-
-        task = task->getNext();
-    }
-
-    if (highestPriorityTask != nullptr) // Is a task ready to run?
-    {
-
-        auto taskRun = (*highestPriorityTask)[0];
-
-        taskRun->misses = 0;
-        taskRun->runCounter++;
-
-        if (!taskRun->getInitialised())
-        {
-            // VRBS_MSG("Initialising task %s. \n", taskRun->getTaskName());
-            taskRun->setInitialised(true); // Before init so the task can override this when initialising.
-            taskRun->taskInit();
-        }
-
-        if (taskRun->getInitialised())
-        { // Check again, as initialisation might have failed.
-
-            VRBS_MSG("Running task %s. \n", taskRun->getTaskName());
-            int64_t taskStart = Core::NOW();
-            taskRun->taskRun();
-            int64_t taskLength = Core::NOW() - taskStart;
-            taskRun->taskRuntime_ = taskRun->taskRuntime_ * 0.98 + taskLength * 0.02;
-            VRBS_MSG("Task %s took %.3fus to run. \n", taskRun->getTaskName(), float(taskLength) / Core::MICROSECONDS);
-
-            if (Core::NOW() - taskRun->counterResetTimestamp >= 5 * Core::SECONDS)
-            {
-                float dTime = float(Core::NOW() - taskRun->counterResetTimestamp) / Core::SECONDS;
-
-                taskRun->taskRate_ = float(taskRun->runCounter) / dTime;
-                taskRun->counterResetTimestamp = Core::NOW();
-                taskRun->runCounter = 0;
-            }
-        }
-    }
-    else if (sleepFunction_ != nullptr && sleepingAllowed && nextTaskToRun != nullptr)
-    { // We can sleep if we have a sleep function, sleeping is allowed by all tasks and we have a task waiting to be run
-
-        auto sleepTime = (*nextTaskToRun)[0]->getRelease() - NOW();
-
-        if (sleepTime > sleepMargin_ + minSleepTime_)
-        {
-            // VRBS_MSG("Sleeping for %.3fus. \n", float(sleepTime - sleepMargin_)/Core::MICROSECONDS);
-            sleepFunction_(sleepTime - sleepMargin_);
-        }
-    }
-
-    // VRBS_MSG("Scheduler tick end. \n");
-    /*for (size_t i = 0; i < taskIndexRun_.size(); i++) {
-        Core::printM("Taskrun %d, %d\n", taskIndexRun_[i], tasks_[taskIndexRun_[i]].pseudoPriority);
-    }*/
-}
-
-void VCTR::Core::Scheduler::setSleepFunction(void (*sleepFunction)(int64_t))
-{
-    sleepFunction_ = sleepFunction;
+void VCTR::Core::Scheduler::setSleepFunction(void (*sleepFunction)(int64_t)) {
+  sleepFunction_ = sleepFunction;
 }
 
 // Scheduler::Taskabstract functions
 
-VCTR::Core::Scheduler::Task::Task()
-{
-    taskListElement_[0] = this;
+VCTR::Core::Scheduler::Task::Task() {
+  taskListElement_[0] = this;
 
-    taskName_[49] = '\0'; // Make sure end.
-    taskName_[0] = '\0';  // Make sure end.
+  taskName_[49] = '\0'; // Make sure end.
+  taskName_[0] = '\0';  // Make sure end.
 }
 
-VCTR::Core::Scheduler::Task::Task(char const *taskName)
-{
-    taskListElement_[0] = this;
+VCTR::Core::Scheduler::Task::Task(char const *taskName) {
+  taskListElement_[0] = this;
 
-    strncpy(taskName_, taskName, 50);
-    taskName_[49] = '\0'; // Make sure end.
+  strncpy(taskName_, taskName, 50);
+  taskName_[49] = '\0'; // Make sure end.
 }
 
-VCTR::Core::Scheduler::Task::~Task()
-{
-    if (scheduler_ != nullptr)
-        scheduler_->removeTask(*this);
+VCTR::Core::Scheduler::Task::~Task() {
+  if (scheduler_ != nullptr)
+    scheduler_->removeTask(*this);
 }
 
-void VCTR::Core::Scheduler::Task::taskInit()
-{
-}
+void VCTR::Core::Scheduler::Task::taskInit() {}
 
-void VCTR::Core::Scheduler::Task::taskRun()
-{
-    taskThread();
-}
+void VCTR::Core::Scheduler::Task::taskRun() { taskThread(); }
 
 void VCTR::Core::Scheduler::Task::taskCheck() {}
 
-const char *VCTR::Core::Scheduler::Task::getTaskName() const
-{
-    return taskName_;
+const char *VCTR::Core::Scheduler::Task::getTaskName() const {
+  return taskName_;
 }
 
-int64_t VCTR::Core::Scheduler::Task::getDeadline() const
-{
-    return taskDeadline_;
+int64_t VCTR::Core::Scheduler::Task::getDeadline() const {
+  return taskDeadline_;
 }
 
-void VCTR::Core::Scheduler::Task::setDeadline(int64_t deadline)
-{
-    taskDeadline_ = deadline;
-    if (taskDeadline_ < taskRelease_)
-        taskRelease_ = taskDeadline_;
+void VCTR::Core::Scheduler::Task::setDeadline(int64_t deadline) {
+  taskDeadline_ = deadline;
+  if (taskDeadline_ < taskRelease_)
+    taskRelease_ = taskDeadline_;
 }
 
-int64_t VCTR::Core::Scheduler::Task::getRelease() const
-{
-    return taskRelease_;
+int64_t VCTR::Core::Scheduler::Task::getRelease() const { return taskRelease_; }
+
+void VCTR::Core::Scheduler::Task::setRelease(int64_t release) {
+  taskRelease_ = release;
+  if (taskRelease_ > taskDeadline_)
+    taskDeadline_ = taskRelease_;
 }
 
-void VCTR::Core::Scheduler::Task::setRelease(int64_t release)
-{
-    taskRelease_ = release;
-    if (taskRelease_ > taskDeadline_)
-        taskDeadline_ = taskRelease_;
+uint16_t VCTR::Core::Scheduler::Task::getPriority() const {
+  return taskPriority_;
 }
 
-uint16_t VCTR::Core::Scheduler::Task::getPriority() const
-{
-    return taskPriority_;
+void VCTR::Core::Scheduler::Task::setPriority(uint16_t priority) {
+  taskPriority_ = priority;
 }
 
-void VCTR::Core::Scheduler::Task::setPriority(uint16_t priority)
-{
-    taskPriority_ = priority;
+bool VCTR::Core::Scheduler::Task::getInitialised() const {
+  return taskInitisalised_;
 }
 
-bool VCTR::Core::Scheduler::Task::getInitialised() const
-{
-    return taskInitisalised_;
+void VCTR::Core::Scheduler::Task::setInitialised(bool isInitialised) {
+  taskInitisalised_ = isInitialised;
 }
 
-void VCTR::Core::Scheduler::Task::setInitialised(bool isInitialised)
-{
-    taskInitisalised_ = isInitialised;
+bool VCTR::Core::Scheduler::Task::getPaused() const { return taskPaused_; }
+
+void VCTR::Core::Scheduler::Task::setPaused(bool pause) { taskPaused_ = pause; }
+
+float VCTR::Core::Scheduler::Task::getRate() const { return taskRate_; }
+
+int64_t VCTR::Core::Scheduler::Task::getRuntime() const { return taskRuntime_; }
+
+void VCTR::Core::Scheduler::Task::setAllowSleep(bool allowSleep) {
+  allowSleep_ = allowSleep;
 }
 
-bool VCTR::Core::Scheduler::Task::getPaused() const
-{
-    return taskPaused_;
+bool VCTR::Core::Scheduler::Task::getAllowSleep() const { return allowSleep_; }
+
+VCTR::Core::Scheduler const *VCTR::Core::Scheduler::Task::getScheduler() const {
+  return scheduler_;
 }
 
-void VCTR::Core::Scheduler::Task::setPaused(bool pause)
-{
-    taskPaused_ = pause;
-}
-
-float VCTR::Core::Scheduler::Task::getRate() const
-{
-    return taskRate_;
-}
-
-int64_t VCTR::Core::Scheduler::Task::getRuntime() const
-{
-    return taskRuntime_;
-}
-
-void VCTR::Core::Scheduler::Task::setAllowSleep(bool allowSleep)
-{
-    allowSleep_ = allowSleep;
-}
-
-bool VCTR::Core::Scheduler::Task::getAllowSleep() const
-{
-    return allowSleep_;
-}
-
-VCTR::Core::Scheduler const *VCTR::Core::Scheduler::Task::getScheduler() const
-{
-    return scheduler_;
-}
-
-void VCTR::Core::Scheduler::Task::removeFromScheduler()
-{
-    if (scheduler_ != nullptr)
-        scheduler_->removeTask(*this);
+void VCTR::Core::Scheduler::Task::removeFromScheduler() {
+  if (scheduler_ != nullptr)
+    scheduler_->removeTask(*this);
 }
