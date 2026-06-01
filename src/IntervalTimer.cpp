@@ -18,7 +18,7 @@ IntervalTimer::IntervalTimer(int64_t period, int64_t highTime,
 // Lifecycle
 // ════════════════════════════════════════════════════════════════════
 
-void IntervalTimer::start() { start(NOW()); }
+void IntervalTimer::start() { start(NowNs()); }
 
 void IntervalTimer::start(int64_t originNs) {
   origin = originNs;
@@ -40,7 +40,7 @@ bool IntervalTimer::isRunning() const { return running; }
 void IntervalTimer::update() {
   if (!running)
     return;
-  update(NOW());
+  update(NowNs());
 }
 
 void IntervalTimer::update(int64_t nowNs) {
@@ -59,7 +59,7 @@ bool IntervalTimer::needUpdate() const {
   if (period <= 0)
     return false;
 
-  const int64_t nowNs = NOW();
+  const int64_t nowNs = NowNs();
   const int64_t elapsed = nowNs - lastUpdateNs;
   return elapsed >= period || isHighAtPosition(cyclePosition(nowNs)) != wasHigh;
 }
@@ -76,7 +76,7 @@ void IntervalTimer::setPeriod(int64_t periodNs) {
 
   // Avoid artificial edge detection after runtime reconfiguration.
   if (running && period > 0) {
-    const int64_t nowNs = NOW();
+    const int64_t nowNs = NowNs();
     wasHigh = isHighAtPosition(cyclePosition(nowNs));
     lastUpdateNs = nowNs;
   }
@@ -93,7 +93,7 @@ void IntervalTimer::setHighTime(int64_t highTimeNs) {
 
   // Avoid artificial edge detection after runtime reconfiguration.
   if (running && period > 0) {
-    const int64_t nowNs = NOW();
+    const int64_t nowNs = NowNs();
     wasHigh = isHighAtPosition(cyclePosition(nowNs));
     lastUpdateNs = nowNs;
   }
@@ -106,10 +106,10 @@ void IntervalTimer::setDutyCycleRatio(float ratio) {
     ratio = 0.0f;
   if (ratio > 1.0f)
     ratio = 1.0f;
-  // Delegate to setHighTime so that wasHigh is recalculated when the
-  // timer is already running, avoiding phantom edge detection.
-  setHighTime(static_cast<int64_t>(static_cast<double>(period) *
-                                   static_cast<double>(ratio)));
+  // Integer multiply then divide to stay in int64_t land.
+  // ratio is only used here at configuration time, not in the hot path.
+  highTime = static_cast<int64_t>(static_cast<double>(period) *
+                                  static_cast<double>(ratio));
 }
 
 void IntervalTimer::setFallingEdgeOffset(int64_t offsetNs) {
@@ -134,21 +134,21 @@ void IntervalTimer::setMissPolicy(MissPolicy policy) {
 void IntervalTimer::sync(int64_t syncTimestampNs) {
   if (period <= 0)
     return;
-  phaseOffset = calcSyncOffset(syncTimestampNs);
-  // Do NOT reset wasHigh — the next update() will detect any edge
-  // crossing caused by the phase adjustment and fire accordingly.
-}
-
-int64_t IntervalTimer::calcSyncOffset(int64_t syncTimestampNs) const {
-  if (period <= 0)
-    return 0;
   // Compute the phase offset that places a rising edge exactly at
   // syncTimestampNs.  We reduce modulo period so phaseOffset always
   // stays within [0, period) — never exceeding one full interval.
   int64_t raw = (syncTimestampNs - origin) % period;
   if (raw < 0)
     raw += period;
-  return raw;
+  phaseOffset = raw;
+  // Do NOT reset wasHigh — the next update() will detect any edge
+  // crossing caused by the phase adjustment and fire accordingly.
+}
+
+int64_t IntervalTimer::getTimingOffset() const {
+  if (!running)
+    return 0;
+  return phaseOffset;
 }
 
 void IntervalTimer::adjustPhase(int64_t deltaNs) { phaseOffset += deltaNs; }
@@ -161,7 +161,7 @@ void IntervalTimer::clearPhaseOffset() { phaseOffset = 0; }
 // State queries
 // ════════════════════════════════════════════════════════════════════
 
-bool IntervalTimer::isInHighPhase() const { return isInHighPhase(NOW()); }
+bool IntervalTimer::isInHighPhase() const { return isInHighPhase(NowNs()); }
 
 bool IntervalTimer::isInHighPhase(int64_t nowNs) const {
   if (!running || period <= 0)
@@ -170,7 +170,7 @@ bool IntervalTimer::isInHighPhase(int64_t nowNs) const {
 }
 
 int64_t IntervalTimer::getCycleElapsed() const {
-  return getCycleElapsed(NOW());
+  return getCycleElapsed(NowNs());
 }
 
 int64_t IntervalTimer::getCycleElapsed(int64_t nowNs) const {
@@ -186,7 +186,7 @@ float IntervalTimer::getCycleElapsedPercent() const {
 }
 
 int64_t IntervalTimer::getCompletedCycles() const {
-  return getCompletedCycles(NOW());
+  return getCompletedCycles(NowNs());
 }
 
 int64_t IntervalTimer::getCompletedCycles(int64_t nowNs) const {
@@ -200,7 +200,7 @@ int64_t IntervalTimer::getCompletedCycles(int64_t nowNs) const {
 }
 
 int64_t IntervalTimer::getIntervalStart(int32_t cycleOffset) const {
-  return getIntervalStart(cycleOffset, NOW());
+  return getIntervalStart(cycleOffset, NowNs());
 }
 
 int64_t IntervalTimer::getIntervalStart(int32_t cycleOffset,

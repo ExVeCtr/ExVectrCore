@@ -57,7 +57,7 @@ public:
 
   // ── Lifecycle ───────────────────────────────────────────────────
 
-  /// Start (or restart) the timer.  Sets the cycle origin to NOW().
+  /// Start (or restart) the timer.  Sets the cycle origin to Now().
   void start();
 
   /// Start the timer with an explicit origin timestamp (e.g. a packet
@@ -76,7 +76,7 @@ public:
   /// update(), and fire callbacks as appropriate.
   void update();
 
-  /// Same as update() but uses the supplied timestamp instead of NOW().
+  /// Same as update() but uses the supplied timestamp instead of Now().
   /// Useful when you already have the time or are running in a
   /// deterministic test harness.
   void update(int64_t nowNs);
@@ -119,8 +119,9 @@ public:
   /// update().
   void sync(int64_t syncTimestampNs);
 
-  /// @brief Calculates the phase offset from the given sync time
-  int64_t calcSyncOffset(int64_t syncTimestampNs) const;
+  /// Returns the current timing offset (position within the current
+  /// cycle) in nanoseconds.
+  int64_t getTimingOffset() const;
 
   /// Shift the phase by \p deltaNs (positive = delay, negative =
   /// advance) without modifying the origin.  The delta is accumulated

@@ -9,14 +9,6 @@
 
 #include "clock_source.hpp"
 
-// The ESP8266 SDK (eagle_soc.h) defines NOW() as a macro that reads a HW timer
-// register. We must undefine it so our method declaration compiles. This is
-// safe: the SDK only uses NOW() in pre-compiled .a libraries, not in any
-// headers.
-#ifdef NOW
-#undef NOW
-#endif
-
 namespace VCTR {
 
 namespace Core {
@@ -52,7 +44,7 @@ public:
   /**
    * Gets the current corrected time in nanoseconds.
    */
-  int64_t NOW();
+  int64_t Now();
 
   /**
    * Gets the currect corrected time in seconds as double.

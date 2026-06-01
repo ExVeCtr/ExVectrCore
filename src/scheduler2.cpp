@@ -1,5 +1,3 @@
-#include <Arduino.h>
-
 #include "stddef.h"
 #include "stdint.h"
 #include "string.h"
@@ -86,7 +84,7 @@ int32_t VCTR::Core::Scheduler::getTaskPseudoPriority(
   // size_t criteria4 = task.taskRuntime_;
 
   // size_t criteria5 = 0;
-  /*if (NOW() > task.getDeadline())
+  /*if (Now() > task.getDeadline())
       return INT32_MAX;*/
 
   auto pseudoPriority =
@@ -153,7 +151,7 @@ void VCTR::Core::Scheduler::tick() {
           release < (*nextTaskToRun)[0]->getRelease())
         nextTaskToRun = task;
 
-      if (NOW() > release) {
+      if (NowNs() > release) {
         (*task)[0]->misses++;
 
         if ((*task)[0]->pseudoPriority > highestPriority) {
@@ -184,27 +182,20 @@ void VCTR::Core::Scheduler::tick() {
     if (taskRun->getInitialised()) { // Check again, as initialisation might
                                      // have failed.
 
-      // VRBS_MSG("Running task %s. \n", taskRun->getTaskName());
-      int64_t taskStart = Core::NOW();
+      VRBS_MSG("Running task %s. \n", taskRun->getTaskName());
+      int64_t taskStart = Core::NowNs();
       taskRun->taskRun();
-      int64_t taskLength = Core::NOW() - taskStart;
-      taskRun->taskRuntime_ =
-          taskLength; // taskRun->taskRuntime_ * 0.98 + taskLength * 0.02;
-      // VRBS_MSG("Task %s took %.3fus to run. \n", taskRun->getTaskName(),
-      // float(taskLength) / Core::MICROSECONDS);
+      int64_t taskLength = Core::NowNs() - taskStart;
+      taskRun->taskRuntime_ = taskRun->taskRuntime_ * 0.98 + taskLength * 0.02;
+      VRBS_MSG("Task %s took %.3fus to run. \n", taskRun->getTaskName(),
+               float(taskLength) / Core::MICROSECONDS);
 
-      if (taskLength > Core::MILLISECONDS * 2) {
-        // Serial.printf("Task %s took %.3fms to run. \n",
-        // taskRun->getTaskName(),
-        //               double(taskLength) / Core::MILLISECONDS);
-      }
-
-      if (Core::NOW() - taskRun->counterResetTimestamp >= 5 * Core::SECONDS) {
-        float dTime =
-            float(Core::NOW() - taskRun->counterResetTimestamp) / Core::SECONDS;
+      if (Core::NowNs() - taskRun->counterResetTimestamp >= 5 * Core::SECONDS) {
+        float dTime = float(Core::NowNs() - taskRun->counterResetTimestamp) /
+                      Core::SECONDS;
 
         taskRun->taskRate_ = float(taskRun->runCounter) / dTime;
-        taskRun->counterResetTimestamp = Core::NOW();
+        taskRun->counterResetTimestamp = Core::NowNs();
         taskRun->runCounter = 0;
       }
     }
@@ -214,7 +205,7 @@ void VCTR::Core::Scheduler::tick() {
                             // sleeping is allowed by all tasks and we have a
                             // task waiting to be run
 
-    auto sleepTime = (*nextTaskToRun)[0]->getRelease() - NOW();
+    auto sleepTime = (*nextTaskToRun)[0]->getRelease() - NowNs();
 
     if (sleepTime > sleepMargin_ + minSleepTime_) {
       // VRBS_MSG("Sleeping for %.3fus. \n", float(sleepTime -

@@ -21,28 +21,20 @@ constexpr int64_t YEARS = 365 * DAYS;
 /// @brief The end of time for precise clock.
 constexpr int64_t END_OF_TIME = INT64_MAX;
 
-// The ESP8266 SDK (eagle_soc.h) defines NOW() as a macro that reads a HW timer
-// register. We must undefine it so our function declaration compiles. This is
-// safe: the SDK only uses NOW() in pre-compiled .a libraries, not in any
-// headers.
-#ifdef NOW
-#undef NOW
-#endif
-
 /**
  * Gets the current internal precise clocks time in nanoseconds.
  * @note Use a Time_Source with a Clock_Source to accurate time. @see
  * time_source.hpp
  */
-extern int64_t NOW();
+extern int64_t NowNs();
 
 /**
  * Gets the current internal precise clocks time in seconds as double. Not as
- * fast as NOW().
+ * fast as Now().
  * @note Use a Time_Source with a Clock_Source to accurate time. @see
  * time_source.hpp
  */
-extern double NOWSeconds();
+extern double NowS();
 
 /**
  * @brief Blocks everything for given amount of time in nanoseconds.

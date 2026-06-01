@@ -67,8 +67,8 @@ void printE(const char *format, ...);
 #ifdef EXVECTR_DEBUG_ENABLE
 #define LOG_MSG(...)                                                           \
   {                                                                            \
-    VCTR::Core::printD("%.6f LOG from %s, %d, %s: ", Core::NOWSeconds(),       \
-                       __FILE__, __LINE__, __FUNCTION__);                      \
+    VCTR::Core::printD("%.6f LOG from %s, %d, %s: ", Core::NowS(), __FILE__,   \
+                       __LINE__, __FUNCTION__);                                \
     VCTR::Core::printD(__VA_ARGS__);                                           \
   } // Use this to print debugging messages.
 #else
@@ -78,7 +78,7 @@ void printE(const char *format, ...);
 #ifdef EXVECTR_DEBUG_VRBS_ENABLE
 #define VRBS_MSG(...)                                                          \
   {                                                                            \
-    VCTR::Core::printD("%.6f VERBOSE from %s, %d, %s: ", Core::NOWSeconds(),   \
+    VCTR::Core::printD("%.6f VERBOSE from %s, %d, %s: ", Core::NowS(),         \
                        __FILE__, __LINE__, __FUNCTION__);                      \
     VCTR::Core::printD(__VA_ARGS__);                                           \
   } // Use this to print debugging messages.
